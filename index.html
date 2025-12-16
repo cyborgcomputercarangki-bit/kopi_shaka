@@ -3,212 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasir Gabungan - CRISPY CHICK & KOPI SHAKA</title>
+    <title>POS System - CRISPY CHICK & KOPI SHAKA</title>
     <style>
-        /* Gaya CSS untuk tampilan yang lebih teratur */
-        body { font-family: sans-serif; margin: 20px; background-color: #f0f0f0; }
-        h1 { color: #5c3b1a; text-align: center; border-bottom: 3px solid #ccc; padding-bottom: 10px; }
-        h2 { color: #8B4513; margin-top: 0; }
-        h3 { color: #333; border-bottom: 1px dashed #ccc; padding-bottom: 5px; margin-top: 15px; }
+        /* FONT DAN RESET DASAR */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f8f8; display: flex; flex-direction: column; height: 100vh; }
         
-        .container { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; }
-        .menu-area { flex: 3; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .order-area { flex: 1; background-color: #fffaf0; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: sticky; top: 20px; height: fit-content; }
+        /* HEADER */
+        .header { background-color: #5c3b1a; color: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 1.5em; }
+
+        /* LAYOUT UTAMA (MAIN) */
+        .main-content { display: flex; flex: 1; overflow: hidden; }
         
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
-        .menu-column { background-color: #f9f9f9; padding: 10px; border-radius: 6px; }
+        /* KOLOM KIRI: MENU & KATEGORI */
+        .menu-sidebar { flex: 3; background-color: white; padding: 15px; border-right: 1px solid #ddd; display: flex; flex-direction: column; }
+        .category-tabs { display: flex; flex-wrap: wrap; margin-bottom: 15px; gap: 8px; }
+        .category-button { 
+            padding: 8px 15px; 
+            border: 1px solid #ccc; 
+            background-color: #eee; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            font-size: 0.9em; 
+            transition: background-color 0.2s;
+        }
+        .category-button:hover, .category-button.active { 
+            background-color: #8B4513; 
+            color: white; 
+            border-color: #8B4513;
+        }
         
+        .menu-items-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+            gap: 15px; 
+            overflow-y: auto; 
+            padding-right: 10px; /* Ruang untuk scrollbar */
+            flex: 1;
+        }
         .menu-item { 
             background-color: #fff; 
-            border: 1px solid #ddd; 
+            border: 1px solid #ccc; 
             padding: 10px; 
-            margin-bottom: 8px; 
+            text-align: center; 
             cursor: pointer; 
+            border-radius: 8px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            transition: transform 0.1s;
+        }
+        .menu-item:active { transform: scale(0.98); }
+        .menu-item img {
+            width: 100%;
+            height: 90px; /* Tinggi gambar yang seragam */
+            object-fit: cover; /* Memastikan gambar mengisi area tanpa terdistorsi */
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .item-name { font-weight: bold; font-size: 0.95em; margin-bottom: 5px; }
+        .item-price { color: #5c3b1a; font-size: 1.1em; }
+        .hidden { display: none; }
+
+        /* KOLOM KANAN: PESANAN */
+        .order-area { flex: 1.5; background-color: #fffaf0; display: flex; flex-direction: column; padding: 15px; }
+        .order-area h2 { margin-top: 0; color: #8B4513; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        
+        #order-list { list-style: none; padding: 0; margin: 0; flex: 1; overflow-y: auto; }
+        #order-list li { 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
+            padding: 10px 0; 
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        .order-item-detail { flex-grow: 1; }
+        .order-item-qty { font-weight: bold; margin-right: 15px; color: #8B4513; }
+        .order-item-name { font-size: 0.9em; }
+        .remove-btn { 
+            background-color: #c9302c; 
+            color: white; 
+            border: none; 
+            padding: 4px 8px; 
             border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.8em; 
+            margin-left: 10px;
+        }
+
+        /* TOTAL DAN TOMBOL AKSI */
+        .summary-total { margin-top: 15px; padding: 15px 0; border-top: 2px solid #8B4513; }
+        .summary-total div { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; }
+        
+        .action-buttons { display: flex; gap: 10px; padding-top: 10px; }
+        .action-buttons button { 
+            flex: 1; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 5px; 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
             transition: background-color 0.2s;
         }
-        .menu-item:hover { background-color: #e6e6e6; }
-        .item-name { font-weight: bold; }
-        .item-price { font-style: italic; color: #5c3b1a; }
-        
-        /* Gaya Pesanan */
-        #order-list { list-style: none; padding: 0; max-height: 400px; overflow-y: auto;}
-        #order-list li { padding: 8px 0; border-bottom: 1px dotted #ccc; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; }
-        #total-display { font-size: 1.6em; font-weight: bold; margin-top: 15px; padding-top: 10px; border-top: 3px solid #8B4513; text-align: right; }
-        
-        button { background-color: #8B4513; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%; }
-        #clear-order-btn { background-color: #c9302c; }
+        #process-order-btn { background-color: #4CAF50; } /* Hijau */
+        #process-order-btn:hover { background-color: #45a049; }
+        #clear-order-btn { background-color: #f44336; } /* Merah */
+        #clear-order-btn:hover { background-color: #da190b; }
     </style>
 </head>
 <body>
 
-    <h1>Aplikasi Kasir Gabungan: CRISPY CHICK & KOPI SHAKA</h1>
-    
-    <div class="container">
+    <div class="header">
+        <h1>POS System | CRISPY CHICK & KOPI SHAKA</h1>
+        </div>
+
+    <div class="main-content">
         
-        <div class="menu-area">
-            <h2>Daftar Menu</h2>
-
-            <div class="menu-grid">
-                
-                <div class="menu-column">
-                    <h2>🍗 CRISPY CHICK (Makanan)</h2>
-                    
-                    <h3>AYAM CRISPY & GEPREK</h3>
-                    <div class="menu-item" data-name="Dada Crispy" data-price="12000"><span class="item-name">Dada Crispy</span><span class="item-price">Rp 12.000</span></div>
-                    <div class="menu-item" data-name="Paha Atas Crispy" data-price="12000"><span class="item-name">Paha Atas Crispy</span><span class="item-price">Rp 12.000</span></div>
-                    <div class="menu-item" data-name="Paha Bawah Crispy" data-price="12000"><span class="item-name">Paha Bawah Crispy</span><span class="item-price">Rp 12.000</span></div>
-                    <div class="menu-item" data-name="Sayap Dada Crispy" data-price="12000"><span class="item-name">Sayap Dada Crispy</span><span class="item-price">Rp 12.000</span></div>
-                    <div class="menu-item" data-name="Dada Geprek" data-price="12000"><span class="item-name">Dada Geprek</span><span class="item-price">Rp 12.000</span></div>
-                    <div class="menu-item" data-name="Paha Atas Geprek" data-price="12000"><span class="item-name">Paha Atas Geprek</span><span class="item-price">Rp 12.000</span></div>
-                    <div class="menu-item" data-name="Paha Bawah Geprek" data-price="12000"><span class="item-name">Paha Bawah Geprek</span><span class="item-price">Rp 12.000</span></div>
-                    <div class="menu-item" data-name="Sayap Dada Geprek" data-price="12000"><span class="item-name">Sayap Dada Geprek</span><span class="item-price">Rp 12.000</span></div>
-
-                    <h3>OTHER & NASI</h3>
-                    <div class="menu-item" data-name="Bakso Goreng Crispy" data-price="10000"><span class="item-name">Bakso Goreng Crispy</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Bakso Geprek" data-price="10000"><span class="item-name">Bakso Geprek</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Telur Goreng Crispy" data-price="8000"><span class="item-name">Telur Goreng Crispy</span><span class="item-price">Rp 8.000</span></div>
-                    <div class="menu-item" data-name="Telur Geprek" data-price="10000"><span class="item-name">Telur Geprek</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Tempe / Tahu Geprek" data-price="10000"><span class="item-name">Tempe / Tahu Geprek</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Kentang Goreng (CRISPY CHICK)" data-price="13000"><span class="item-name">Kentang Goreng</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Nasi Putih" data-price="5000"><span class="item-name">Nasi Putih</span><span class="item-price">Rp 5.000</span></div>
-                    
-                    <h3>PAKET HEMAT (+ ES TEH)</h3>
-                    <div class="menu-item" data-name="Paket Hemat Ayam Crispy" data-price="20000"><span class="item-name">Paket Hemat Ayam Crispy</span><span class="item-price">Rp 20.000</span></div>
-                    <div class="menu-item" data-name="Paket Hemat Ayam Geprek" data-price="20000"><span class="item-name">Paket Hemat Ayam Geprek</span><span class="item-price">Rp 20.000</span></div>
+        <div class="menu-sidebar">
+            <h2>Pilih Menu</h2>
+            
+            <div class="category-tabs" id="category-tabs">
                 </div>
 
-                <div class="menu-column">
-                    <h2>☕ KOPI SHAKA (Minuman)</h2>
-
-                    <h3>COFFEE HOT & COLD</h3>
-                    <div class="menu-item" data-name="Kopi Hitam (H)" data-price="8000"><span class="item-name">Kopi Hitam (H)</span><span class="item-price">Rp 8.000</span></div>
-                    <div class="menu-item" data-name="Americano (H/C)" data-price="10000"><span class="item-name">Americano (H/C)</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Kopi Hitam Gula Aren (H)" data-price="10000"><span class="item-name">Kopi Hitam Gula Aren (H)</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Kopi Susu (H)" data-price="10000"><span class="item-name">Kopi Susu (H)</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Es Kopi Susu Jadoel" data-price="13000"><span class="item-name">Es Kopi Susu Jadoel</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Kopi Susu Gula Aren (H/C)" data-price="13000"><span class="item-name">Kopi Susu Gula Aren (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Cappuccino (H/C)" data-price="13000"><span class="item-name">Cappuccino (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Mocacino (H/C)" data-price="13000"><span class="item-name">Mocacino (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Kopi Hazelnut (H/C)" data-price="13000"><span class="item-name">Kopi Hazelnut (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Kopi Vanilla (H/C)" data-price="13000"><span class="item-name">Kopi Vanilla (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Kopi Caramel (H/C)" data-price="13000"><span class="item-name">Kopi Caramel (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Kopi Butterscoat (H/C)" data-price="13000"><span class="item-name">Kopi Butterscoat (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Kopi Pandan (H/C)" data-price="13000"><span class="item-name">Kopi Pandan (H/C)</span><span class="item-price">Rp 13.000</span></div>
-
-                    <h3>TEA HOT & COLD</h3>
-                    <div class="menu-item" data-name="Teh (H/C)" data-price="5000"><span class="item-name">Teh (H/C)</span><span class="item-price">Rp 5.000</span></div>
-                    <div class="menu-item" data-name="Teh Susu (H/C)" data-price="10000"><span class="item-name">Teh Susu (H/C)</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Teh Tarik (H/C)" data-price="13000"><span class="item-name">Teh Tarik (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Lemon Tee (H/C)" data-price="13000"><span class="item-name">Lemon Tee (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Thai Tea (H/C)" data-price="13000"><span class="item-name">Thai Tea (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Green Tea (H/C)" data-price="13000"><span class="item-name">Green Tea (H/C)</span><span class="item-price">Rp 13.000</span></div>
+            <div class="menu-items-grid" id="menu-items-grid">
                 </div>
-
-                <div class="menu-column">
-                    <h2>🥤 KOPI SHAKA (Non-Kopi & Lainnya)</h2>
-
-                    <h3>VARIANT COKELAT (C)</h3>
-                    <div class="menu-item" data-name="Milo (H/C)" data-price="13000"><span class="item-name">Milo (H/C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Chocolate (C)" data-price="13000"><span class="item-name">Chocolate (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Choco Hazelnut (C)" data-price="13000"><span class="item-name">Choco Hazelnut (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Creamy Choco (C)" data-price="13000"><span class="item-name">Creamy Choco (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Choco Cookies (C)" data-price="13000"><span class="item-name">Choco Cookies (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Choco Cheesee (C)" data-price="13000"><span class="item-name">Choco Cheesee (C)</span><span class="item-price">Rp 13.000</span></div>
-                    
-                    <h3>VARIANT MILKSHAKE (C)</h3>
-                    <div class="menu-item" data-name="Milkshake Cokelat (C)" data-price="13000"><span class="item-name">Milkshake Cokelat (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Milkshake Vanilla (C)" data-price="13000"><span class="item-name">Milkshake Vanilla (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Milkshake Strawberry (C)" data-price="13000"><span class="item-name">Milkshake Strawberry (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Milkshake Vanilla Blue (C)" data-price="13000"><span class="item-name">Milkshake Vanilla Blue (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Milkshake Oreo Cookies (C)" data-price="13000"><span class="item-name">Milkshake Oreo Cookies (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Milkshake Red Velvet (C)" data-price="13000"><span class="item-name">Milkshake Red Velvet (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Milkshake Taro (C)" data-price="13000"><span class="item-name">Milkshake Taro (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Milkshake Tiramisu (C)" data-price="13000"><span class="item-name">Milkshake Tiramisu (C)</span><span class="item-price">Rp 13.000</span></div>
-
-                    <h3>VARIANT SQUASH (C)</h3>
-                    <div class="menu-item" data-name="Manggo Squash (C)" data-price="13000"><span class="item-name">Manggo Squash (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Lemonaded Squash (C)" data-price="13000"><span class="item-name">Lemonaded Squash (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Melon Squash (C)" data-price="13000"><span class="item-name">Melon Squash (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Orange Squash (C)" data-price="13000"><span class="item-name">Orange Squash (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Strawberry Squash (C)" data-price="13000"><span class="item-name">Strawberry Squash (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Soda Gembira (C)" data-price="13000"><span class="item-name">Soda Gembira (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Extra Joss Susu (C)" data-price="10000"><span class="item-name">Extra Joss Susu (C)</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Sprite" data-price="10000"><span class="item-name">Sprite</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Fanta" data-price="10000"><span class="item-name">Fanta</span><span class="item-price">Rp 10.000</span></div>
-
-                    <h3>VARIANT JUS BUAH (C)</h3>
-                    <div class="menu-item" data-name="Jus Buah Alpukat (C)" data-price="13000"><span class="item-name">Jus Buah Alpukat (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Jus Buah Apel (C)" data-price="13000"><span class="item-name">Jus Buah Apel (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Jus Buah Naga (C)" data-price="13000"><span class="item-name">Jus Buah Naga (C)</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Jeruk Peras (C)" data-price="10000"><span class="item-name">Jeruk Peras (C)</span><span class="item-price">Rp 10.000</span></div>
-
-                    <h3>AIR MINERAL</h3>
-                    <div class="menu-item" data-name="Air Mineral Gelas" data-price="1000"><span class="item-name">Air Mineral Gelas</span><span class="item-price">Rp 1.000</span></div>
-                    <div class="menu-item" data-name="Air Mineral Botol" data-price="5000"><span class="item-name">Air Mineral Botol</span><span class="item-price">Rp 5.000</span></div>
-                </div>
-
-                <div class="menu-column">
-                    <h2>🍔 KOPI SHAKA (Snack & Makanan)</h2>
-                    
-                    <h3>INDOMIE & KENTANG</h3>
-                    <div class="menu-item" data-name="Indomie Goreng Jumbo" data-price="9000"><span class="item-name">Indomie Goreng Jumbo</span><span class="item-price">Rp 9.000</span></div>
-                    <div class="menu-item" data-name="Indomie Goreng Jumbo + Telur" data-price="12000"><span class="item-name">Indomie Goreng Jumbo + Telur</span><span class="item-price">Rp 12.000</span></div>
-                    <div class="menu-item" data-name="Aneka Indomie Kuah" data-price="8000"><span class="item-name">Aneka Indomie Kuah</span><span class="item-price">Rp 8.000</span></div>
-                    <div class="menu-item" data-name="Aneka Indomie Kuah + Telur" data-price="11000"><span class="item-name">Aneka Indomie Kuah + Telur</span><span class="item-price">Rp 11.000</span></div>
-                    <div class="menu-item" data-name="Kentang Goreng (KOPI SHAKA)" data-price="13000"><span class="item-name">Kentang Goreng</span><span class="item-price">Rp 13.000</span></div>
-
-                    <h3>ROTI & PISANG</h3>
-                    <div class="menu-item" data-name="Roti Bakar Cokelat" data-price="10000"><span class="item-name">Roti Bakar Cokelat</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Roti Bakar Keju" data-price="10000"><span class="item-name">Roti Bakar Keju</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Pisang Goreng Kambeng Original" data-price="10000"><span class="item-name">Pisang Goreng Kambeng Original</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Pisang Goreng Kambeng Palm Sugar" data-price="13000"><span class="item-name">Pisang Goreng Kambeng Palm Sugar</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Pisang Goreng Kambeng Cokelat" data-price="13000"><span class="item-name">Pisang Goreng Kambeng Cokelat</span><span class="item-price">Rp 13.000</span></div>
-                    <div class="menu-item" data-name="Pisang Goreng Kambeng Keju" data-price="13000"><span class="item-name">Pisang Goreng Kambeng Keju</span><span class="item-price">Rp 13.000</span></div>
-
-                    <h3>SNACK LAINNYA</h3>
-                    <div class="menu-item" data-name="Bakso Bakar" data-price="10000"><span class="item-name">Bakso Bakar</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Bakso Goreng" data-price="10000"><span class="item-name">Bakso Goreng</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Tahu Goreng" data-price="10000"><span class="item-name">Tahu Goreng</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Tahu Balado" data-price="10000"><span class="item-name">Tahu Balado</span><span class="item-price">Rp 10.000</span></div>
-                    <div class="menu-item" data-name="Ubi Jalar Goreng" data-price="13000"><span class="item-name">Ubi Jalar Goreng</span><span class="item-price">Rp 13.000</span></div>
-                </div>
-
-            </div>
         </div>
 
         <div class="order-area">
-            <h2>📝 Pesanan Saat Ini</h2>
+            <h2>🧾 Pesanan Pelanggan</h2>
             
             <ul id="order-list">
                 </ul>
 
-            <div id="total-display">
-                Total: Rp 0
+            <div class="summary-total">
+                <div>
+                    <span>TOTAL</span>
+                    <span id="total-display">Rp 0</span>
+                </div>
             </div>
 
-            <button id="process-order-btn">Proses Pembayaran</button>
-            <button id="clear-order-btn">Batal Pesanan</button>
+            <div class="action-buttons">
+                <button id="clear-order-btn">BATALKAN</button>
+                <button id="process-order-btn">PROSES PEMBAYARAN</button>
+            </div>
         </div>
 
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
     <script>
-        // Dapatkan elemen-elemen penting
-        const menuItems = document.querySelectorAll('.menu-item');
+        // Konfigurasi Firebase dari akun Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyAf4pkzvpCuzmXquzIoCDXLAr6-_l3i8O0",
+            authDomain: "kopi-shaka.firebaseapp.com",
+            projectId: "kopi-shaka",
+            storageBucket: "kopi-shaka.firebasestorage.app",
+            messagingSenderId: "947498895962",
+            appId: "1:947498895962:web:ebb8bc420bdbc47e086663"
+        };
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = app.firestore();
+    </script>
+
+    <script>
+        // Data Menu Anda (Disusun ulang untuk mendukung fitur Kategori dan Gambar)
+        const allMenuItems = {
+            'Ayam Crispy': [
+                { name: "Dada Crispy", price: 12000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Paha Atas Crispy", price: 12000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Paha Bawah Crispy", price: 12000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Sayap Dada Crispy", price: 12000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Paket Ayam Crispy + Es Teh", price: 20000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+            ],
+            'Ayam Geprek': [
+                { name: "Dada Geprek", price: 12000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Paha Atas Geprek", price: 12000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Paha Bawah Geprek", price: 12000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Sayap Dada Geprek", price: 12000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Paket Ayam Geprek + Es Teh", price: 20000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+            ],
+            'Makanan Lain': [
+                { name: "Bakso Goreng Crispy", price: 10000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Bakso Geprek", price: 10000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Telur Goreng Crispy", price: 8000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Telur Geprek", price: 10000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Tempe / Tahu Geprek", price: 10000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Kentang Goreng", price: 13000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Nasi Putih", price: 5000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+            ],
+            'Kopi': [
+                { name: "Kopi Hitam (H)", price: 8000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Americano (H/C)", price: 10000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Es Kopi Susu Jadoel", price: 13000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Kopi Susu Gula Aren (H/C)", price: 13000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Cappuccino (H/C)", price: 13000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Kopi Vanilla (H/C)", price: 13000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+            ],
+            'Non-Kopi & Teh': [
+                { name: "Teh (H/C)", price: 5000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Thai Tea (H/C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Milo (H/C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Chocolate (C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Milkshake Cokelat (C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Manggo Squash (C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Air Mineral Botol", price: 5000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+            ],
+            'Snack Kopi Shaka': [
+                { name: "Indomie Goreng Jumbo + Telur", price: 12000, category: "Snack Kopi Shaka", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Roti Bakar Cokelat", price: 10000, category: "Snack Kopi Shaka", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Pisang Goreng Kambeng Original", price: 10000, category: "Snack Kopi Shaka", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+                { name: "Bakso Bakar", price: 10000, category: "Snack Kopi Shaka", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
+            ]
+        };
+
+        const categories = Object.keys(allMenuItems);
+        let currentOrder = [];
         const orderList = document.getElementById('order-list');
         const totalDisplay = document.getElementById('total-display');
+        const menuGrid = document.getElementById('menu-items-grid');
+        const categoryTabs = document.getElementById('category-tabs');
         const processButton = document.getElementById('process-order-btn');
         const clearButton = document.getElementById('clear-order-btn');
 
-        let currentOrder = [];
+
+        // FUNGSI 1: MENGGAMBAR KATEGORI DAN MENU
+        function renderMenu() {
+            // Render Tombol Kategori
+            categoryTabs.innerHTML = '';
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category;
+                button.className = 'category-button';
+                button.setAttribute('data-category', category);
+                button.addEventListener('click', () => filterMenu(category));
+                categoryTabs.appendChild(button);
+            });
+
+            // Otomatis tampilkan kategori pertama saat inisialisasi
+            if (categories.length > 0) {
+                filterMenu(categories[0]);
+            }
+        }
+
+        // FUNGSI 2: FILTER MENU BERDASARKAN KATEGORI
+        function filterMenu(selectedCategory) {
+            menuGrid.innerHTML = '';
+            
+            // Atur status aktif pada tombol kategori
+            document.querySelectorAll('.category-button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-category') === selectedCategory) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Tampilkan item menu yang sesuai
+            const items = allMenuItems[selectedCategory] || [];
+            items.forEach(item => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item';
+                menuItem.innerHTML = `
+                    <img src="${item.img}" alt="${item.name}">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-price">Rp ${item.price.toLocaleString('id-ID')}</div>
+                `;
+                menuItem.addEventListener('click', () => addToOrder(item.name, item.price));
+                menuGrid.appendChild(menuItem);
+            });
+        }
         
-        // Fungsi untuk mengupdate tampilan pesanan
+        // FUNGSI 3: MENGUPDATE TAMPILAN PESANAN
         function updateOrderDisplay() {
-            orderList.innerHTML = ''; 
+            orderList.innerHTML = '';
             let total = 0;
 
             currentOrder.forEach((item, index) => {
@@ -217,19 +284,20 @@
 
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `
-                    <span>${item.name} x ${item.quantity}</span>
-                    <div style="display:flex; align-items:center;">
-                        <span>Rp ${itemTotal.toLocaleString('id-ID')}</span>
-                        <button onclick="removeItem(${index})" style="background-color: #8B4513; padding: 3px 5px; margin-left: 10px; font-weight: bold; width: auto; font-size: 0.8em;">X</button>
+                    <div class="order-item-detail">
+                        <div class="order-item-name">${item.name}</div>
                     </div>
+                    <span class="order-item-qty">${item.quantity} x</span>
+                    <span>Rp ${itemTotal.toLocaleString('id-ID')}</span>
+                    <button class="remove-btn" onclick="removeItem(${index})">Hapus</button>
                 `;
                 orderList.appendChild(listItem);
             });
 
-            totalDisplay.textContent = `Total: Rp ${total.toLocaleString('id-ID')}`;
+            totalDisplay.textContent = `Rp ${total.toLocaleString('id-ID')}`;
         }
         
-        // Fungsi untuk menambahkan/mengupdate item ke pesanan
+        // FUNGSI 4: TAMBAH/UPDATE PESANAN (sama seperti sebelumnya)
         function addToOrder(name, price) {
             const existingItem = currentOrder.find(item => item.name === name);
 
@@ -238,39 +306,42 @@
             } else {
                 currentOrder.push({ name: name, price: price, quantity: 1 });
             }
-
             updateOrderDisplay();
         }
 
-        // Fungsi untuk menghapus item dari pesanan
-        function removeItem(index) {
-            currentOrder.splice(index, 1); 
+        // FUNGSI 5: HAPUS ITEM (dipanggil dari tombol Hapus)
+        window.removeItem = function(index) {
+            currentOrder.splice(index, 1);
             updateOrderDisplay();
-        }
+        };
 
-        // Tambahkan event listener ke setiap item menu
-        menuItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const name = item.getAttribute('data-name');
-                const price = parseInt(item.getAttribute('data-price'));
-                addToOrder(name, price);
-            });
-        });
-        
-        // Event listener untuk tombol Proses Pembayaran
-        processButton.addEventListener('click', () => {
+        // FUNGSI 6: PROSES PEMBAYARAN (Integrasi Firebase)
+        processButton.addEventListener('click', async () => {
             const total = currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
             if (total > 0) {
-                 alert(`Total pembayaran: Rp ${total.toLocaleString('id-ID')}. Transaksi selesai. Terima kasih!`);
-                 currentOrder = []; 
-                 updateOrderDisplay();
+                const transactionData = {
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    totalAmount: total,
+                    items: currentOrder,
+                    status: "Selesai"
+                };
+                
+                try {
+                    const docRef = await db.collection("transaksi").add(transactionData);
+                    alert(`Transaksi berhasil! Total: Rp ${total.toLocaleString('id-ID')}. ID Transaksi: ${docRef.id}`);
+                    currentOrder = []; 
+                    updateOrderDisplay();
+                } catch (error) {
+                    console.error("Error saat menyimpan transaksi:", error);
+                    alert("Gagal menyimpan transaksi ke database.");
+                }
             } else {
                 alert('Tidak ada item dalam pesanan!');
             }
-           
         });
         
-        // Event listener untuk tombol Batal Pesanan
+        // FUNGSI 7: BATAL PESANAN
         clearButton.addEventListener('click', () => {
             if (currentOrder.length > 0 && confirm("Apakah Anda yakin ingin membatalkan semua pesanan saat ini?")) {
                 currentOrder = [];
@@ -278,9 +349,9 @@
             }
         });
 
-        // Inisialisasi tampilan awal
-        updateOrderDisplay(); 
-
+        // INISIALISASI
+        renderMenu();
+        updateOrderDisplay();
     </script>
 </body>
 </html>

@@ -2,356 +2,393 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS System - CRISPY CHICK & KOPI SHAKA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHAKA POS - Executive Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* FONT DAN RESET DASAR */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f8f8f8; display: flex; flex-direction: column; height: 100vh; }
+        :root {
+            --primary: #d4a373; --bg: #0a0a0a; --card: #161616;
+            --text: #ffffff; --text-dim: #a0a0a0; --accent: #795548;
+            --success: #00c853; --error: #ff3d00; --shadow: rgba(0,0,0,0.6);
+        }
         
-        /* HEADER */
-        .header { background-color: #5c3b1a; color: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { margin: 0; font-size: 1.5em; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            margin: 0; background: var(--bg); color: var(--text); 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            background-image: radial-gradient(circle at 50% -20%, #2c1e1a 0%, #0a0a0a 80%);
+        }
 
-        /* LAYOUT UTAMA (MAIN) */
-        .main-content { display: flex; flex: 1; overflow: hidden; }
-        
-        /* KOLOM KIRI: MENU & KATEGORI */
-        .menu-sidebar { flex: 3; background-color: white; padding: 15px; border-right: 1px solid #ddd; display: flex; flex-direction: column; }
-        .category-tabs { display: flex; flex-wrap: wrap; margin-bottom: 15px; gap: 8px; }
-        .category-button { 
-            padding: 8px 15px; 
-            border: 1px solid #ccc; 
-            background-color: #eee; 
-            cursor: pointer; 
-            border-radius: 4px; 
-            font-size: 0.9em; 
-            transition: background-color 0.2s;
+        /* --- HEADER --- */
+        header { 
+            padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(20,20,20,0.8); backdrop-filter: blur(15px); border-bottom: 1px solid #222; z-index: 100;
         }
-        .category-button:hover, .category-button.active { 
-            background-color: #8B4513; 
-            color: white; 
-            border-color: #8B4513;
+        header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 800; color: var(--primary); }
+        .logout-btn { 
+            background: rgba(255,61,0,0.1); border: 1px solid rgba(255,61,0,0.2); color: var(--error);
+            padding: 8px 16px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.3s;
         }
-        
-        .menu-items-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
-            gap: 15px; 
-            overflow-y: auto; 
-            padding-right: 10px; /* Ruang untuk scrollbar */
-            flex: 1;
+        .logout-btn:hover { background: var(--error); color: white; }
+
+        /* --- CONTENT --- */
+        .main-content { flex: 1; overflow-y: auto; padding-bottom: 120px; }
+        .page { display: none; padding: 20px; max-width: 900px; margin: 0 auto; animation: pageIn 0.4s ease-out; }
+        .page.active { display: block; }
+
+        @keyframes pageIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CATEGORY --- */
+        .cat-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 0 20px; scrollbar-width: none; }
+        .cat-chip { 
+            background: #1a1a1a; border: 1px solid #333; color: #777; 
+            padding: 10px 24px; border-radius: 50px; white-space: nowrap; 
+            font-size: 0.75rem; font-weight: 700; transition: 0.3s; cursor: pointer;
         }
+        .cat-chip.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 5px 15px rgba(212, 163, 115, 0.3); }
+
+        /* --- MENU GRID --- */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 15px; }
         .menu-item { 
-            background-color: #fff; 
-            border: 1px solid #ccc; 
-            padding: 10px; 
-            text-align: center; 
-            cursor: pointer; 
-            border-radius: 8px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-            transition: transform 0.1s;
+            background: var(--card); border: 1px solid #222; border-radius: 28px;
+            padding: 20px 15px; text-align: center; cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative;
         }
-        .menu-item:active { transform: scale(0.98); }
-        .menu-item img {
-            width: 100%;
-            height: 90px; /* Tinggi gambar yang seragam */
-            object-fit: cover; /* Memastikan gambar mengisi area tanpa terdistorsi */
-            border-radius: 4px;
-            margin-bottom: 8px;
-        }
-        .item-name { font-weight: bold; font-size: 0.95em; margin-bottom: 5px; }
-        .item-price { color: #5c3b1a; font-size: 1.1em; }
-        .hidden { display: none; }
-
-        /* KOLOM KANAN: PESANAN */
-        .order-area { flex: 1.5; background-color: #fffaf0; display: flex; flex-direction: column; padding: 15px; }
-        .order-area h2 { margin-top: 0; color: #8B4513; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        .menu-item:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .menu-item:active { transform: scale(0.95); background: #222; }
         
-        #order-list { list-style: none; padding: 0; margin: 0; flex: 1; overflow-y: auto; }
-        #order-list li { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 10px 0; 
-            border-bottom: 1px dashed #e0e0e0;
+        .cat-tag { font-size: 0.55rem; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .item-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; }
+        .item-price { color: var(--text-dim); font-size: 0.8rem; font-weight: 600; }
+
+        /* --- ADMIN CARDS --- */
+        .admin-card { 
+            background: #1a1a1a; padding: 20px; border-radius: 22px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid #222;
         }
-        .order-item-detail { flex-grow: 1; }
-        .order-item-qty { font-weight: bold; margin-right: 15px; color: #8B4513; }
-        .order-item-name { font-size: 0.9em; }
-        .remove-btn { 
-            background-color: #c9302c; 
-            color: white; 
-            border: none; 
-            padding: 4px 8px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 0.8em; 
-            margin-left: 10px;
+        .stock-control { display: flex; gap: 8px; align-items: center; }
+        .btn-stock { background: #333; color: white; border: none; width: 35px; height: 35px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-stock:active { background: var(--primary); color: black; }
+
+        /* --- TASKBAR --- */
+        .taskbar { 
+            position: fixed; bottom: 25px; left: 25px; right: 25px; 
+            background: rgba(28,28,28,0.85); backdrop-filter: blur(25px);
+            height: 75px; border-radius: 25px; display: flex; 
+            border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 40px var(--shadow);
+        }
+        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #555; cursor: pointer; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-style: normal; font-size: 1.5rem; margin-bottom: 3px; }
+        .nav-item span { font-size: 0.65rem; font-weight: 700; }
+
+        /* --- MODALS --- */
+        .modal { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
+            display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px);
+        }
+        .modal-content { 
+            background: var(--card); padding: 35px; border-radius: 35px; width: 100%; 
+            max-width: 450px; border: 1px solid #333; animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes modalPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        input, select { 
+            background: #222; border: 1px solid #333; color: white; padding: 16px; 
+            border-radius: 18px; width: 100%; margin-bottom: 15px; outline: none; font-size: 1rem;
+        }
+        .btn-main { 
+            background: var(--primary); color: #000; border: none; padding: 18px; 
+            border-radius: 18px; font-weight: 800; cursor: pointer; width: 100%; box-shadow: 0 8px 20px rgba(212,163,115,0.3);
         }
 
-        /* TOTAL DAN TOMBOL AKSI */
-        .summary-total { margin-top: 15px; padding: 15px 0; border-top: 2px solid #8B4513; }
-        .summary-total div { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; }
-        
-        .action-buttons { display: flex; gap: 10px; padding-top: 10px; }
-        .action-buttons button { 
-            flex: 1; 
-            padding: 15px; 
-            border: none; 
-            border-radius: 5px; 
-            color: white; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: background-color 0.2s;
-        }
-        #process-order-btn { background-color: #4CAF50; } /* Hijau */
-        #process-order-btn:hover { background-color: #45a049; }
-        #clear-order-btn { background-color: #f44336; } /* Merah */
-        #clear-order-btn:hover { background-color: #da190b; }
+        #loginPage { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 30px; }
+        #toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: var(--primary); color: #000; padding: 15px 35px; border-radius: 50px; font-weight: 800; display: none; z-index: 5000; box-shadow: 0 10px 30px var(--shadow); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>POS System | CRISPY CHICK & KOPI SHAKA</h1>
-        </div>
+<div id="toast">DONE</div>
 
-    <div class="main-content">
+<div id="loginPage">
+    <div style="background:var(--card); padding:50px 40px; border-radius:40px; width:100%; max-width:400px; text-align:center; border:1px solid #222;">
+        <h1 style="color:var(--primary); margin-bottom:10px; font-weight:800; letter-spacing:5px;">SHAKA</h1>
+        <p style="color:#555; font-size:0.75rem; margin-bottom:40px; letter-spacing:2px;">COFFEE INTELLIGENCE</p>
+        <input type="text" id="user" placeholder="Username">
+        <input type="password" id="pass" placeholder="Password">
+        <button class="btn-main" onclick="doLogin()">SIGN IN</button>
+    </div>
+</div>
+
+<header>
+    <h1>SHAKA.</h1>
+    <button class="logout-btn" onclick="location.reload()">LOGOUT</button>
+</header>
+
+<div class="main-content">
+    <div id="p-kasir" class="page active">
+        <div class="cat-scroll" id="catBar"></div>
+        <div style="display:flex; gap:10px; margin-bottom:20px">
+            <input type="text" id="cName" placeholder="Customer Name" style="margin:0">
+            <input type="text" id="tNum" placeholder="Table" style="margin:0; width:90px">
+        </div>
+        <div id="menuGrid" class="menu-grid"></div>
         
-        <div class="menu-sidebar">
-            <h2>Pilih Menu</h2>
-            
-            <div class="category-tabs" id="category-tabs">
-                </div>
-
-            <div class="menu-items-grid" id="menu-items-grid">
-                </div>
-        </div>
-
-        <div class="order-area">
-            <h2>🧾 Pesanan Pelanggan</h2>
-            
-            <ul id="order-list">
-                </ul>
-
-            <div class="summary-total">
-                <div>
-                    <span>TOTAL</span>
-                    <span id="total-display">Rp 0</span>
-                </div>
+        <div style="background:rgba(255,255,255,0.03); border-radius:35px; padding:30px; margin-top:30px; border:1px solid #222;">
+            <div id="cartList"></div>
+            <div style="display:flex; justify-content:space-between; margin:25px 0; align-items:center">
+                <span style="color:#666; font-weight:700">TOTAL BILL</span>
+                <span id="totalPrice" style="color:var(--primary); font-size:1.8rem; font-weight:800">Rp 0</span>
             </div>
-
-            <div class="action-buttons">
-                <button id="clear-order-btn">BATALKAN</button>
-                <button id="process-order-btn">PROSES PEMBAYARAN</button>
-            </div>
+            <button class="btn-main" onclick="openPay()">CHECKOUT</button>
         </div>
-
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <div id="p-history" class="page">
+        <h2 style="color:var(--primary)">Recent Transactions</h2>
+        <div id="hList"></div>
+    </div>
 
-    <script>
-        // Konfigurasi Firebase dari akun Anda
-        const firebaseConfig = {
-            apiKey: "AIzaSyAf4pkzvpCuzmXquzIoCDXLAr6-_l3i8O0",
-            authDomain: "kopi-shaka.firebaseapp.com",
-            projectId: "kopi-shaka",
-            storageBucket: "kopi-shaka.firebasestorage.app",
-            messagingSenderId: "947498895962",
-            appId: "1:947498895962:web:ebb8bc420bdbc47e086663"
-        };
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = app.firestore();
-    </script>
+    <div id="p-rekap" class="page">
+        <h2 style="color:var(--primary)">Performance Analytics</h2>
+        <div id="rekapData"></div>
+    </div>
 
-    <script>
-        // Data Menu Anda (Disusun ulang untuk mendukung fitur Kategori dan Gambar)
-        const allMenuItems = {
-            'Ayam Crispy': [
-                { name: "Dada Crispy", price: 12000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Paha Atas Crispy", price: 12000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Paha Bawah Crispy", price: 12000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Sayap Dada Crispy", price: 12000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Paket Ayam Crispy + Es Teh", price: 20000, category: "Ayam Crispy", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-            ],
-            'Ayam Geprek': [
-                { name: "Dada Geprek", price: 12000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Paha Atas Geprek", price: 12000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Paha Bawah Geprek", price: 12000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Sayap Dada Geprek", price: 12000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Paket Ayam Geprek + Es Teh", price: 20000, category: "Ayam Geprek", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-            ],
-            'Makanan Lain': [
-                { name: "Bakso Goreng Crispy", price: 10000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Bakso Geprek", price: 10000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Telur Goreng Crispy", price: 8000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Telur Geprek", price: 10000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Tempe / Tahu Geprek", price: 10000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Kentang Goreng", price: 13000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Nasi Putih", price: 5000, category: "Makanan Lain", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-            ],
-            'Kopi': [
-                { name: "Kopi Hitam (H)", price: 8000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Americano (H/C)", price: 10000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Es Kopi Susu Jadoel", price: 13000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Kopi Susu Gula Aren (H/C)", price: 13000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Cappuccino (H/C)", price: 13000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Kopi Vanilla (H/C)", price: 13000, category: "Kopi", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-            ],
-            'Non-Kopi & Teh': [
-                { name: "Teh (H/C)", price: 5000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Thai Tea (H/C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Milo (H/C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Chocolate (C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Milkshake Cokelat (C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Manggo Squash (C)", price: 13000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Air Mineral Botol", price: 5000, category: "Non-Kopi & Teh", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-            ],
-            'Snack Kopi Shaka': [
-                { name: "Indomie Goreng Jumbo + Telur", price: 12000, category: "Snack Kopi Shaka", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Roti Bakar Cokelat", price: 10000, category: "Snack Kopi Shaka", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Pisang Goreng Kambeng Original", price: 10000, category: "Snack Kopi Shaka", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-                { name: "Bakso Bakar", price: 10000, category: "Snack Kopi Shaka", img: "https://generativelanguage.googleapis.com/v1beta/models/image-gemini/generateContent" },
-            ]
-        };
+    <div id="p-admin" class="page">
+        <h2 style="color:var(--primary)">Inventory Management</h2>
+        <button class="btn-main" style="margin-bottom:25px" onclick="openAddMenu()">+ ADD NEW MENU</button>
+        <div id="adminList"></div>
+    </div>
+</div>
 
-        const categories = Object.keys(allMenuItems);
-        let currentOrder = [];
-        const orderList = document.getElementById('order-list');
-        const totalDisplay = document.getElementById('total-display');
-        const menuGrid = document.getElementById('menu-items-grid');
-        const categoryTabs = document.getElementById('category-tabs');
-        const processButton = document.getElementById('process-order-btn');
-        const clearButton = document.getElementById('clear-order-btn');
+<div class="taskbar">
+    <div class="nav-item active" onclick="tab('kasir', this)"><i>🛒</i><span>KASIR</span></div>
+    <div class="nav-item" onclick="tab('history', this)"><i>📜</i><span>HISTORY</span></div>
+    <div class="nav-item" onclick="tab('rekap', this)"><i>📊</i><span>STATS</span></div>
+    <div id="adm-nav" class="nav-item" style="display:none" onclick="tab('admin', this)"><i>⚙️</i><span>ADMIN</span></div>
+</div>
 
+<div id="menuModal" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-top:0">New Product</h2>
+        <input type="text" id="m-name" placeholder="Item Name">
+        <input type="number" id="m-price" placeholder="Price (Rp)">
+        <input type="number" id="m-stock" placeholder="Initial Stock">
+        <select id="m-cat">
+            <option value="COFFEE">COFFEE</option>
+            <option value="TEA">TEA</option>
+            <option value="JUICE">JUICE</option>
+            <option value="FOOD">FOOD</option>
+            <option value="SNACK">SNACK</option>
+        </select>
+        <button class="btn-main" onclick="saveNewMenu()">SAVE TO CLOUD</button>
+        <button class="btn-main" style="background:transparent; color:#666; box-shadow:none" onclick="closeModal()">CANCEL</button>
+    </div>
+</div>
 
-        // FUNGSI 1: MENGGAMBAR KATEGORI DAN MENU
-        function renderMenu() {
-            // Render Tombol Kategori
-            categoryTabs.innerHTML = '';
-            categories.forEach(category => {
-                const button = document.createElement('button');
-                button.textContent = category;
-                button.className = 'category-button';
-                button.setAttribute('data-category', category);
-                button.addEventListener('click', () => filterMenu(category));
-                categoryTabs.appendChild(button);
-            });
+<div id="payModal" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-top:0; color:var(--primary)">Payment</h2>
+        <div style="background:#111; padding:20px; border-radius:20px; margin-bottom:20px">
+            <small style="color:#555">Total Tagihan:</small>
+            <div id="mTotal" style="font-size:2rem; font-weight:800; color:var(--primary)">Rp 0</div>
+        </div>
+        <input type="number" id="cashInput" placeholder="Cash Amount" oninput="calcChange()" style="font-size:2rem; text-align:center; height:80px">
+        <div style="text-align:center; margin-bottom:25px">
+            <small style="color:#555">Change:</small>
+            <div id="mChange" style="font-size:2.2rem; font-weight:800; color:var(--success)">Rp 0</div>
+        </div>
+        <button id="btnFinish" class="btn-main" onclick="finishOrder()">CONFIRM & PRINT</button>
+        <button class="btn-main" style="background:transparent; color:#666; box-shadow:none" onclick="closeModal()">CANCEL</button>
+    </div>
+</div>
 
-            // Otomatis tampilkan kategori pertama saat inisialisasi
-            if (categories.length > 0) {
-                filterMenu(categories[0]);
-            }
-        }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot } 
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // FUNGSI 2: FILTER MENU BERDASARKAN KATEGORI
-        function filterMenu(selectedCategory) {
-            menuGrid.innerHTML = '';
-            
-            // Atur status aktif pada tombol kategori
-            document.querySelectorAll('.category-button').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-category') === selectedCategory) {
-                    btn.classList.add('active');
-                }
-            });
+    const firebaseConfig = {
+        apiKey: "AIzaSyAf4pkzvpCuzmXquzIoCDXLAr6-_l3i8O0",
+        authDomain: "kopi-shaka.firebaseapp.com",
+        projectId: "kopi-shaka",
+        storageBucket: "kopi-shaka.firebasestorage.app",
+        messagingSenderId: "947498895962",
+        appId: "1:947498895962:web:ebb8bc420bdbc47e086663"
+    };
 
-            // Tampilkan item menu yang sesuai
-            const items = allMenuItems[selectedCategory] || [];
-            items.forEach(item => {
-                const menuItem = document.createElement('div');
-                menuItem.className = 'menu-item';
-                menuItem.innerHTML = `
-                    <img src="${item.img}" alt="${item.name}">
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-price">Rp ${item.price.toLocaleString('id-ID')}</div>
-                `;
-                menuItem.addEventListener('click', () => addToOrder(item.name, item.price));
-                menuGrid.appendChild(menuItem);
-            });
-        }
-        
-        // FUNGSI 3: MENGUPDATE TAMPILAN PESANAN
-        function updateOrderDisplay() {
-            orderList.innerHTML = '';
-            let total = 0;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-            currentOrder.forEach((item, index) => {
-                const itemTotal = item.price * item.quantity;
-                total += itemTotal;
+    let menus = [];
+    let cart = [];
+    let activeCat = 'ALL';
 
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
-                    <div class="order-item-detail">
-                        <div class="order-item-name">${item.name}</div>
-                    </div>
-                    <span class="order-item-qty">${item.quantity} x</span>
-                    <span>Rp ${itemTotal.toLocaleString('id-ID')}</span>
-                    <button class="remove-btn" onclick="removeItem(${index})">Hapus</button>
-                `;
-                orderList.appendChild(listItem);
-            });
+    function toast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2000);
+    }
 
-            totalDisplay.textContent = `Rp ${total.toLocaleString('id-ID')}`;
-        }
-        
-        // FUNGSI 4: TAMBAH/UPDATE PESANAN (sama seperti sebelumnya)
-        function addToOrder(name, price) {
-            const existingItem = currentOrder.find(item => item.name === name);
+    window.doLogin = () => {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        if(u === 'admin' && p === 'shaka123') {
+            document.getElementById('adm-nav').style.display = 'flex';
+            document.getElementById('loginPage').style.display = 'none';
+        } else if(u === 'kasir' && p === 'kopi123') {
+            document.getElementById('loginPage').style.display = 'none';
+        } else alert('Invalid Access');
+    };
 
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                currentOrder.push({ name: name, price: price, quantity: 1 });
-            }
-            updateOrderDisplay();
-        }
+    onSnapshot(collection(db, "menus"), (snap) => {
+        menus = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAll();
+    });
 
-        // FUNGSI 5: HAPUS ITEM (dipanggil dari tombol Hapus)
-        window.removeItem = function(index) {
-            currentOrder.splice(index, 1);
-            updateOrderDisplay();
-        };
+    function renderAll() {
+        // Categories
+        const bar = document.getElementById('catBar');
+        const cats = ['ALL', ...new Set(menus.map(m => m.category))];
+        bar.innerHTML = cats.map(c => `<div class="cat-chip ${activeCat === c ? 'active' : ''}" onclick="setCat('${c}')">${c}</div>`).join('');
 
-        // FUNGSI 6: PROSES PEMBAYARAN (Integrasi Firebase)
-        processButton.addEventListener('click', async () => {
-            const total = currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            if (total > 0) {
-                const transactionData = {
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    totalAmount: total,
-                    items: currentOrder,
-                    status: "Selesai"
-                };
-                
-                try {
-                    const docRef = await db.collection("transaksi").add(transactionData);
-                    alert(`Transaksi berhasil! Total: Rp ${total.toLocaleString('id-ID')}. ID Transaksi: ${docRef.id}`);
-                    currentOrder = []; 
-                    updateOrderDisplay();
-                } catch (error) {
-                    console.error("Error saat menyimpan transaksi:", error);
-                    alert("Gagal menyimpan transaksi ke database.");
-                }
-            } else {
-                alert('Tidak ada item dalam pesanan!');
-            }
+        // Kasir Grid
+        const grid = document.getElementById('menuGrid');
+        const filtered = activeCat === 'ALL' ? menus : menus.filter(m => m.category === activeCat);
+        grid.innerHTML = filtered.map(m => `
+            <div class="menu-item" onclick="addToCart('${m.id}')">
+                <span class="cat-tag">${m.category}</span>
+                <div class="item-name">${m.name}</div>
+                <div class="item-price">Rp ${m.price.toLocaleString()}</div>
+                <div style="font-size:0.6rem; margin-top:10px; color:${m.stock < 10 ? 'var(--error)' : '#444'}">STOCK: ${m.stock}</div>
+            </div>
+        `).join('');
+
+        // Admin List
+        const admList = document.getElementById('adminList');
+        admList.innerHTML = menus.map(m => `
+            <div class="admin-card">
+                <div><b style="font-size:0.9rem">${m.name}</b><br><small style="color:#555">${m.category} • Rp ${m.price.toLocaleString()}</small></div>
+                <div class="stock-control">
+                    <small style="margin-right:10px; font-weight:800; color:var(--primary)">${m.stock}</small>
+                    <button class="btn-stock" onclick="updateStock('${m.id}', ${m.stock + 10})">+</button>
+                    <button class="btn-stock" style="background:#222; color:#555" onclick="deleteMenu('${m.id}')">×</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.setCat = (c) => { activeCat = c; renderAll(); };
+
+    window.addToCart = (id) => {
+        const m = menus.find(x => x.id === id);
+        if(m.stock <= 0) return alert("Stok Habis!");
+        const ex = cart.find(x => x.id === id);
+        if(ex) ex.qty++; else cart.push({...m, qty: 1});
+        updateCartUI();
+    };
+
+    function updateCartUI() {
+        const list = document.getElementById('cartList');
+        let total = 0; list.innerHTML = '';
+        cart.forEach(i => {
+            total += (i.price * i.qty);
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #222; font-size:0.85rem">
+                <span>${i.name} <b style="color:var(--primary)">x${i.qty}</b></span>
+                <span>${(i.price*i.qty).toLocaleString()}</span>
+            </div>`;
         });
-        
-        // FUNGSI 7: BATAL PESANAN
-        clearButton.addEventListener('click', () => {
-            if (currentOrder.length > 0 && confirm("Apakah Anda yakin ingin membatalkan semua pesanan saat ini?")) {
-                currentOrder = [];
-                updateOrderDisplay();
-            }
-        });
+        document.getElementById('totalPrice').innerText = 'Rp ' + total.toLocaleString();
+    }
 
-        // INISIALISASI
-        renderMenu();
-        updateOrderDisplay();
-    </script>
+    window.openPay = () => {
+        if(cart.length === 0) return;
+        const total = cart.reduce((a,b)=>a+(b.price*b.qty),0);
+        document.getElementById('mTotal').innerText = 'Rp ' + total.toLocaleString();
+        document.getElementById('payModal').style.display = 'flex';
+        setTimeout(()=>document.getElementById('cashInput').focus(), 300);
+    };
+
+    window.calcChange = () => {
+        const total = cart.reduce((a,b)=>a+(b.price*b.qty),0);
+        const cash = document.getElementById('cashInput').value || 0;
+        document.getElementById('mChange').innerText = 'Rp ' + (cash-total > 0 ? (cash-total).toLocaleString() : 0);
+    };
+
+    window.finishOrder = async () => {
+        const total = cart.reduce((a,b)=>a+(b.price*b.qty),0);
+        const cash = parseInt(document.getElementById('cashInput').value);
+        if(cash < total) return alert("Uang Kurang");
+
+        const btn = document.getElementById('btnFinish');
+        btn.disabled = true; btn.innerText = "SAVING...";
+
+        try {
+            await addDoc(collection(db, "transactions"), {
+                tgl: new Date().toISOString(),
+                nama: document.getElementById('cName').value || 'Guest',
+                total: total,
+                items: cart.map(c => c.name + ' x' + c.qty)
+            });
+            for(let i of cart) {
+                await updateDoc(doc(db, "menus", i.id), { stock: i.stock - i.qty });
+            }
+            closeModal(); toast("💰 PAYMENT SUCCESS");
+            cart = []; updateCartUI();
+            document.getElementById('cName').value = '';
+            btn.disabled = false; btn.innerText = "CONFIRM & PRINT";
+        } catch(e) { alert(e); }
+    };
+
+    window.updateStock = async (id, ns) => { await updateDoc(doc(db, "menus", id), { stock: ns }); toast("📦 STOCK UPDATED"); };
+    
+    window.saveNewMenu = async () => {
+        const n = document.getElementById('m-name').value;
+        const p = parseInt(document.getElementById('m-price').value);
+        const s = parseInt(document.getElementById('m-stock').value);
+        const c = document.getElementById('m-cat').value;
+        if(!n || !p) return;
+        await addDoc(collection(db, "menus"), { name: n, price: p, stock: s, category: c });
+        closeModal(); toast("✨ ITEM ADDED");
+    };
+
+    window.deleteMenu = async (id) => { if(confirm("Hapus item?")) await deleteDoc(doc(db, "menus", id)); };
+
+    window.tab = (id, el) => {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('p-' + id).classList.add('active');
+        el.classList.add('active');
+        if(id === 'history') loadHistory();
+        if(id === 'rekap') loadRekap();
+    };
+
+    async function loadHistory() {
+        const q = query(collection(db, "transactions"), orderBy("tgl", "desc"));
+        const snap = await getDocs(q);
+        const list = document.getElementById('hList'); list.innerHTML = '';
+        snap.forEach(d => {
+            const t = d.data();
+            list.innerHTML += `<div class="admin-card">
+                <div><small>${new Date(t.tgl).toLocaleTimeString()}</small><br><b>${t.nama}</b></div>
+                <b style="color:var(--primary)">Rp ${t.total.toLocaleString()}</b>
+            </div>`;
+        });
+    }
+
+    async function loadRekap() {
+        const snap = await getDocs(collection(db, "transactions"));
+        let t = 0; snap.forEach(d => t += d.data().total);
+        document.getElementById('rekapData').innerHTML = `
+            <div style="background:var(--primary); color:#000; padding:40px; border-radius:30px; text-align:center">
+                <small style="font-weight:800; letter-spacing:2px">TOTAL REVENUE</small>
+                <h1 style="font-size:3rem; margin:10px 0">Rp ${t.toLocaleString()}</h1>
+            </div>`;
+    }
+
+    window.openAddMenu = () => document.getElementById('menuModal').style.display = 'flex';
+    window.closeModal = () => document.querySelectorAll('.modal').forEach(m => m.style.display='none');
+</script>
 </body>
 </html>

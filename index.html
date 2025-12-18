@@ -80,6 +80,7 @@
             <div class="filter-btn active" onclick="filterCat('ALL', this)">SEMUA</div>
             <div class="filter-btn" onclick="filterCat('COFFEE', this)">COFFEE</div>
             <div class="filter-btn" onclick="filterCat('TEA', this)">TEA</div>
+            <div class="filter-btn" onclick="filterCat('COKELAT', this)">COKELAT</div>
             <div class="filter-btn" onclick="filterCat('SQUASH', this)">SQUASH</div>
             <div class="filter-btn" onclick="filterCat('MILKSHAKE', this)">MILKSHAKE</div>
             <div class="filter-btn" onclick="filterCat('SNACK', this)">SNACK</div>
@@ -141,6 +142,7 @@
         <select id="adm-cat">
             <option value="COFFEE">COFFEE</option>
             <option value="TEA">TEA</option>
+            <option value="COKELAT">COKELAT</option>
             <option value="SQUASH">SQUASH</option>
             <option value="MILKSHAKE">MILKSHAKE</option>
             <option value="SNACK">SNACK</option>
@@ -162,7 +164,6 @@
     const app = initializeApp(firebaseConfig); const db = getFirestore(app);
     let menus = [], cart = [], allTrx = [], currentFilterMode = 'all', lastTrxData = null, selectedCat = 'ALL', currentUser = '', currentFloor = 'Lantai 1';
 
-    // LOGIN & TAB
     window.doLogin = () => {
         const u = document.getElementById('user').value, p = document.getElementById('pass').value;
         if(!u) return alert("Masukkan Nama");
@@ -178,7 +179,6 @@
         if(id==='history' || id==='rekap') loadTrxData();
     };
 
-    // KASIR LOGIC
     onSnapshot(collection(db, "menus"), (snap) => {
         menus = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => a.name.localeCompare(b.name));
         renderMenuGrid(); renderAdmin();
@@ -215,7 +215,6 @@
 
     window.updateQty = (id, delta) => { const i = cart.find(x => x.id === id); i.qty += delta; if(i.qty <= 0) cart = cart.filter(x => x.id !== id); updateCart(); };
 
-    // STATS & HISTORY
     async function loadTrxData() {
         const s = await getDocs(query(collection(db, "transactions"), orderBy("tgl", "desc")));
         allTrx = s.docs.map(d => ({id: d.id, ...d.data()}));
@@ -255,7 +254,6 @@
         document.getElementById('rekapDetail').innerHTML = f.map(tx => `<div class="trx-card" style="display:flex; justify-content:space-between"><div><b>${tx.nama}</b><br><small>${tx.kasir}</small></div><b>Rp ${tx.total.toLocaleString()}</b></div>`).join('');
     };
 
-    // ADMIN LOGIC (KEMBALI DENGAN EDIT)
     window.renderAdmin = () => {
         document.getElementById('adminList').innerHTML = menus.map(m => `
             <div class="trx-card" style="display:flex; justify-content:space-between; align-items:center">
@@ -271,7 +269,7 @@
         const m = menus.find(x => x.id === id);
         document.getElementById('adm-id').value = m.id;
         document.getElementById('adm-name').value = m.name;
-        document.getElementById('adm-cat').value = m.category || 'COFFEE';
+        document.getElementById('adm-cat').value = m.category;
         document.getElementById('adm-price').value = m.price;
         document.getElementById('adm-stock').value = m.stock;
         document.getElementById('adm-title').innerText = "Edit Menu";
@@ -285,7 +283,6 @@
         closeModal();
     };
 
-    // PRINT STRUK (TANPA ESC)
     function formatLine(l, r) { const w = 32; return l + " ".repeat(Math.max(1, w - l.length - r.length)) + r; }
     function sendToRawBT(t) {
         if(!t) return;

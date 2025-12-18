@@ -3,73 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAKA POS - Final Mobile Optimized</title>
+    <title>SHAKA POS - Final Intelligence</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #d4a373; --bg: #0a0a0a; --card: #161616;
-            --text: #ffffff; --text-dim: #a0a0a0; --accent: #795548;
-            --success: #00c853; --error: #ff3d00; --shadow: rgba(0,0,0,0.6);
-        }
+        :root { --primary: #d4a373; --bg: #0a0a0a; --card: #161616; --text: #ffffff; --text-dim: #a0a0a0; --bright-green: #82c91e; --error: #ff3d00; }
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { 
-            margin: 0; background: var(--bg); color: var(--text); 
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-            background-image: radial-gradient(circle at 50% -20%, #2c1e1a 0%, #0a0a0a 80%);
-        }
-
-        /* --- PRINT ENGINE (Thermal 58mm/80mm Optimized) --- */
-        @media print {
-            @page { margin: 0; }
-            body { background: white !important; color: black !important; background-image: none !important; width: 100%; }
-            header, .taskbar, .btn-main, .logout-btn, .cat-scroll, input, .qty-btn, .del-item, .modal { display: none !important; }
-            .main-content { padding: 0; overflow: visible; height: auto; display: block !important; }
-            .page { display: none !important; }
-            #p-kasir { display: block !important; padding: 10px; margin: 0; width: 100% !important; }
-            #cartList { border: none !important; width: 100%; }
-            .menu-grid { display: none !important; }
-            #totalPrice { color: black !important; font-size: 1.2rem; border-top: 1px dashed black; padding-top: 10px; display: block; text-align: right; }
-            #receiptHeader { display: block !important; text-align: center; margin-bottom: 10px; border-bottom: 1px dashed black; padding-bottom: 10px; }
-            .cart-item-row { border-bottom: 1px dotted #ccc !important; padding: 5px 0; color: black !important; }
-        }
-        #receiptHeader { display: none; color: black; }
-
-        /* --- UI DESAIN --- */
-        header { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: rgba(20,20,20,0.8); backdrop-filter: blur(15px); border-bottom: 1px solid #222; z-index: 100; }
-        header h1 { margin: 0; font-size: 1.2rem; letter-spacing: 4px; font-weight: 800; color: var(--primary); }
-        .logout-btn { background: rgba(255,61,0,0.1); border: 1px solid rgba(255,61,0,0.2); color: var(--error); padding: 8px 16px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
+        body { margin: 0; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; background-image: radial-gradient(circle at 50% -20%, #2c1e1a 0%, #0a0a0a 80%); }
+        
+        header { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: rgba(20,20,20,0.8); backdrop-filter: blur(15px); border-bottom: 1px solid #222; }
         .main-content { flex: 1; overflow-y: auto; padding-bottom: 120px; }
-        .page { display: none; padding: 20px; max-width: 900px; margin: 0 auto; animation: pageIn 0.4s ease-out; }
+        .page { display: none; padding: 20px; max-width: 900px; margin: 0 auto; animation: pageIn 0.3s ease; }
         .page.active { display: block; }
-        @keyframes pageIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .cat-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 5px 0 20px; scrollbar-width: none; }
-        .cat-chip { background: #1a1a1a; border: 1px solid #333; color: #777; padding: 10px 24px; border-radius: 50px; white-space: nowrap; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
-        .cat-chip.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 5px 15px rgba(212, 163, 115, 0.3); }
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-        .menu-item { background: var(--card); border: 1px solid #222; border-radius: 25px; padding: 15px; text-align: center; cursor: pointer; }
-        .admin-card { background: #1a1a1a; padding: 20px; border-radius: 22px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; }
-        .qty-btn { background: #222; color: white; border: 1px solid #333; border-radius: 8px; width: 30px; height: 30px; cursor: pointer; }
-        .taskbar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(28,28,28,0.85); backdrop-filter: blur(25px); height: 75px; border-radius: 25px; display: flex; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 20px 40px var(--shadow); z-index: 1000; }
+        @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* UI DAFTAR MENU & HOVER */
+        .menu-name { color: #ffffff; font-weight: 800; font-size: 0.85rem; display: block; margin-bottom: 4px; line-height: 1.2; transition: 0.3s; }
+        .menu-price { color: var(--primary); font-weight: 600; font-size: 0.8rem; display: block; }
+        .menu-stock { font-size: 0.65rem; font-weight: 800; display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 8px; }
+        .stock-safe { color: var(--bright-green); background: rgba(130, 201, 30, 0.15); border: 1px solid rgba(130, 201, 30, 0.3); }
+        .stock-low { color: var(--error); background: rgba(255, 61, 0, 0.15); border: 1px solid rgba(255, 61, 0, 0.3); }
+
+        .trx-card { background: var(--card); border: 1px solid #222; border-radius: 20px; padding: 18px; margin-bottom: 12px; transition: all 0.3s ease; position: relative; }
+        
+        @media (hover: hover) {
+            .trx-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 25px rgba(212, 163, 115, 0.2); background: #1f1f1f; }
+            .trx-card:hover .menu-name { color: var(--primary); }
+        }
+        .trx-card:active { transform: scale(0.96); }
+
+        /* TOAST */
+        #toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: var(--primary); color: black; padding: 12px 25px; border-radius: 50px; font-weight: 800; font-size: 0.85rem; z-index: 5000; display: none; animation: toastIn 0.3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+        @keyframes toastIn { from { bottom: 80px; opacity: 0; } to { bottom: 110px; opacity: 1; } }
+
+        /* FILTER UI */
+        .filter-group { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; scrollbar-width: none; }
+        .filter-btn { background: #1a1a1a; border: 1px solid #333; color: #777; padding: 10px 18px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        .filter-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #222; }
+        .qty-control { display: flex; align-items: center; gap: 12px; background: #222; padding: 6px; border-radius: 15px; border: 1px solid #333; }
+        .qty-btn { background: var(--primary); color: #000; border: none; width: 35px; height: 35px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .taskbar { position: fixed; bottom: 20px; left: 20px; right: 20px; background: rgba(28,28,28,0.9); backdrop-filter: blur(20px); height: 75px; border-radius: 25px; display: flex; border: 1px solid rgba(255,255,255,0.1); z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #555; cursor: pointer; }
         .nav-item.active { color: var(--primary); }
-        .nav-item i { font-style: normal; font-size: 1.5rem; margin-bottom: 3px; }
-        .nav-item span { font-size: 0.6rem; font-weight: 700; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 30px; width: 100%; max-width: 400px; border: 1px solid #333; }
-        input, select { background: #222; border: 1px solid #333; color: white; padding: 14px; border-radius: 15px; width: 100%; margin-bottom: 12px; outline: none; }
-        .btn-main { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 15px; font-weight: 800; cursor: pointer; width: 100%; margin-bottom: 8px; }
-        #loginPage { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 30px; }
-        #toast { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); background: var(--primary); color: #000; padding: 15px 35px; border-radius: 50px; font-weight: 800; display: none; z-index: 5000; }
+        .nav-item span { font-size: 0.6rem; font-weight: 800; margin-top: 4px; }
+
+        input, select { background: #222; border: 1px solid #333; color: white; padding: 15px; border-radius: 18px; width: 100%; margin-bottom: 12px; outline: none; }
+        .btn-main { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 18px; font-weight: 800; cursor: pointer; width: 100%; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 35px; width: 100%; max-width: 400px; border: 1px solid #333; }
+
+        @media print {
+            body * { display: none !important; }
+            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 58mm; color: black !important; background: white !important; padding: 10px; font-family: monospace; font-size: 10pt; }
+        }
     </style>
 </head>
 <body>
 
-<div id="toast">DONE</div>
+<div id="print-area"></div>
+<div id="toast">Item Ditambahkan</div>
 
-<div id="loginPage">
-    <div style="background:var(--card); padding:50px 40px; border-radius:40px; width:100%; max-width:400px; text-align:center; border:1px solid #222;">
-        <h1 style="color:var(--primary); font-weight:800; letter-spacing:5px;">SHAKA</h1>
-        <p style="color:#555; font-size:0.75rem; margin-bottom:40px;">COFFEE INTELLIGENCE</p>
+<div id="loginPage" style="position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; padding:30px;">
+    <div style="background:var(--card); padding:50px 40px; border-radius:45px; width:100%; max-width:400px; text-align:center; border:1px solid #222;">
+        <h1 style="color:var(--primary); font-weight:800; letter-spacing:5px; margin:0;">SHAKA</h1>
+        <p style="color:var(--bright-green); font-size:0.75rem; margin-bottom:40px; font-weight:800; letter-spacing:2px;">COFFEE INTELLIGENCE</p>
         <input type="text" id="user" placeholder="Username">
         <input type="password" id="pass" placeholder="Password">
         <button class="btn-main" onclick="doLogin()">SIGN IN</button>
@@ -77,44 +76,52 @@
 </div>
 
 <header>
-    <h1>SHAKA.</h1>
-    <button class="logout-btn" onclick="location.reload()">LOGOUT</button>
+    <h1 style="color:var(--primary); font-size:1.2rem; letter-spacing:2px; font-weight:800;">SHAKA.</h1>
+    <button onclick="location.reload()" style="background:none; border:none; color:var(--error); font-weight:800; cursor:pointer;">LOGOUT</button>
 </header>
 
 <div class="main-content">
     <div id="p-kasir" class="page active">
-        <div id="receiptHeader"></div>
-        <div class="cat-scroll" id="catBar"></div>
         <div style="display:flex; gap:10px; margin-bottom:15px">
-            <input type="text" id="cName" placeholder="Nama Pelanggan" style="margin:0">
-            <input type="text" id="tNum" placeholder="Meja" style="margin:0; width:90px">
+            <input type="text" id="cName" placeholder="Pelanggan" style="margin:0">
+            <select id="floorLoc" style="margin:0; width:130px">
+                <option value="Lantai 1">Lantai 1</option><option value="Lantai 2">Lantai 2</option><option value="Lantai 3">Lantai 3</option>
+            </select>
         </div>
-        <div id="menuGrid" class="menu-grid"></div>
+        <div id="menuGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:12px;"></div>
         <div style="background:rgba(255,255,255,0.03); border-radius:30px; padding:25px; margin-top:30px; border:1px solid #222;">
             <div id="cartList"></div>
-            <div style="display:flex; justify-content:space-between; margin:20px 0; align-items:center">
-                <span style="color:#666; font-weight:700">TOTAL</span>
+            <div style="display:flex; justify-content:space-between; margin:20px 0">
+                <span style="color:var(--text-dim); font-weight:700">TOTAL</span>
                 <span id="totalPrice" style="color:var(--primary); font-size:1.8rem; font-weight:800">Rp 0</span>
             </div>
-            <button class="btn-main" onclick="openPay()">PROSES PEMBAYARAN</button>
+            <button class="btn-main" onclick="openPayment()">BAYAR SEKARANG</button>
         </div>
     </div>
 
-    <div id="p-history" class="page"><h2 style="color:var(--primary)">Riwayat</h2><div id="hList"></div></div>
+    <div id="p-history" class="page">
+        <h2 style="color:var(--primary)">History</h2>
+        <div id="hList"></div>
+    </div>
 
     <div id="p-rekap" class="page">
-        <h2 style="color:var(--primary)">Laporan</h2>
-        <div class="cat-scroll" style="margin-bottom:20px">
-            <div class="cat-chip active" id="btn-hari" onclick="filterRekap('hari')">Hari</div>
-            <div class="cat-chip" id="btn-bulan" onclick="filterRekap('bulan')">Bulan</div>
-            <div class="cat-chip" id="btn-tahun" onclick="filterRekap('tahun')">Tahun</div>
+        <h2 style="color:var(--primary)">Laporan KOPI SHAKA</h2>
+        <div class="filter-group">
+            <div class="filter-btn active" onclick="setFilterMode('all', this)">Semua</div>
+            <div class="filter-btn" id="btnHari" onclick="setFilterMode('hari', this)">Hari</div>
+            <div class="filter-btn" onclick="setFilterMode('bulan', this)">Bulan</div>
+            <div class="filter-btn" onclick="setFilterMode('tahun', this)">Tahun</div>
         </div>
-        <div id="rekapDisplay"></div>
+        <input type="date" id="selDay" onchange="runFilter(this.value)" style="position:absolute; visibility:hidden; width:0; height:0;">
+        <select id="selMonth" onchange="runFilter(this.value)" style="display:none"></select>
+        <select id="selYear" onchange="runFilter(this.value)" style="display:none"></select>
+        <div id="rekapSummary"></div>
+        <div id="rekapDetail" style="margin-top:20px;"></div>
     </div>
 
     <div id="p-admin" class="page">
         <h2 style="color:var(--primary)">Inventory</h2>
-        <button class="btn-main" onclick="openAddMenu()">+ MENU BARU</button>
+        <button class="btn-main" onclick="openAddMenu()" style="margin-bottom:20px">+ TAMBAH MENU</button>
         <div id="adminList"></div>
     </div>
 </div>
@@ -122,176 +129,178 @@
 <div class="taskbar">
     <div class="nav-item active" onclick="tab('kasir', this)"><i>🛒</i><span>KASIR</span></div>
     <div class="nav-item" onclick="tab('history', this)"><i>📜</i><span>HISTORY</span></div>
-    <div class="nav-item" onclick="tab('rekap', this)"><i>📊</i><span>STATS</span></div>
+    <div class="nav-item" onclick="tab('rekap', this)"><i>📊</i><span>REKAPITULASI</span></div>
     <div id="adm-nav" class="nav-item" style="display:none" onclick="tab('admin', this)"><i>⚙️</i><span>ADMIN</span></div>
 </div>
 
-<div id="menuModal" class="modal"><div class="modal-content">
-    <h2 id="modalTitle">Menu</h2>
-    <input type="hidden" id="m-id"><input type="text" id="m-name" placeholder="Nama"><input type="number" id="m-price" placeholder="Harga"><input type="number" id="m-stock" placeholder="Stok">
-    <select id="m-cat"><option value="COFFEE">COFFEE</option><option value="TEA">TEA</option><option value="FOOD">FOOD</option></select>
-    <button class="btn-main" onclick="saveMenu()">SIMPAN</button>
-    <button class="btn-main" style="background:transparent; color:#666" onclick="closeModal()">BATAL</button>
-</div></div>
-
-<div id="payModal" class="modal"><div class="modal-content">
-    <h2 style="color:var(--primary)">Bayar</h2>
-    <div id="mTotal" style="font-size:2rem; font-weight:800; text-align:center; margin-bottom:15px">Rp 0</div>
-    <input type="number" id="cashInput" placeholder="Tunai" oninput="calcChange()" style="font-size:1.5rem; text-align:center">
-    <div id="mChange" style="font-size:1.2rem; color:var(--success); text-align:center; margin-bottom:15px">Kembali: Rp 0</div>
-    <button class="btn-main" onclick="finishOrder()">KONFIRMASI SELESAI</button>
-    <button class="btn-main" style="background:#333; color:white" onclick="printReceipt()">🖨️ CETAK STRUK</button>
-    <button class="btn-main" style="background:transparent; color:#666" onclick="closeModal()">BATAL</button>
-</div></div>
+<div id="successModal" class="modal"><div class="modal-content" style="text-align:center"><div style="font-size:4rem; color:var(--bright-green)">✓</div><h2>Berhasil</h2><button class="btn-main" onclick="printStrukLastTrx()" style="background:#444; color:white; margin-bottom:10px">🖨️ CETAK STRUK</button><button class="btn-main" onclick="resetKasir()">🏠 SELESAI</button></div></div>
+<div id="payModal" class="modal"><div class="modal-content" style="text-align:center"><h2>Pembayaran</h2><div id="payTotal" style="font-size:2.2rem; font-weight:800; margin-bottom:20px"></div><input type="number" id="payAmount" placeholder="Tunai" oninput="calcChange()"><div style="display:flex; justify-content:space-between; padding:15px 0"><span>Kembalian</span><b id="payChange">Rp 0</b></div><button class="btn-main" onclick="confirmTrx()">PROSES</button></div></div>
+<div id="adminModal" class="modal"><div class="modal-content"><h2>Data Menu</h2><input type="hidden" id="adm-id"><input type="text" id="adm-name" placeholder="Nama"><input type="number" id="adm-price" placeholder="Harga"><input type="number" id="adm-stock" placeholder="Stok"><button class="btn-main" onclick="saveAdminMenu()">SIMPAN</button><button class="btn-main" style="background:none; color:white; margin-top:10px" onclick="closeModal()">BATAL</button></div></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot } 
-    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAf4pkzvpCuzmXquzIoCDXLAr6-_l3i8O0",
-        authDomain: "kopi-shaka.firebaseapp.com",
-        projectId: "kopi-shaka",
-        storageBucket: "kopi-shaka.firebasestorage.app",
-        messagingSenderId: "947498895962",
-        appId: "1:947498895962:web:ebb8bc420bdbc47e086663"
-    };
+    const firebaseConfig = { apiKey: "AIzaSyAf4pkzvpCuzmXquzIoCDXLAr6-_l3i8O0", authDomain: "kopi-shaka.firebaseapp.com", projectId: "kopi-shaka", storageBucket: "kopi-shaka.firebasestorage.app", messagingSenderId: "947498895962", appId: "1:947498895962:web:ebb8bc420bdbc47e086663" };
+    const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+    let menus = [], cart = [], allTrx = [], currentFilterMode = 'all', lastTrxData = null;
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    let menus = [], cart = [], allTransactions = [], activeCat = 'ALL';
-
-    function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2000); }
-    function formatFullDate(iso) { 
-        const d = new Date(iso);
-        return d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'}) + ' • ' + d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+    function showNotif(msg) {
+        const t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block';
+        if (navigator.vibrate) navigator.vibrate(40);
+        setTimeout(() => { t.style.display = 'none'; }, 1500);
     }
+
+    const shakaMenuData = [
+        { name: "Kopi Hitam (H)", price: 8000, category: "Coffee", stock: 100 }, { name: "Americano (H/C)", price: 10000, category: "Coffee", stock: 100 },
+        { name: "Kopi Hitam Gula Aren (H)", price: 10000, category: "Coffee", stock: 100 }, { name: "Kopi Susu (H)", price: 10000, category: "Coffee", stock: 100 },
+        { name: "Es Kopi Susu Jadoel", price: 13000, category: "Coffee", stock: 100 }, { name: "Kopi Susu Gula Aren (H/C)", price: 13000, category: "Coffee", stock: 100 },
+        { name: "Cappuccino (H/C)", price: 13000, category: "Coffee", stock: 100 }, { name: "Mochacinno (H/C)", price: 13000, category: "Coffee", stock: 100 },
+        { name: "Kopi Hazelnut (H/C)", price: 13000, category: "Coffee", stock: 100 }, { name: "Kopi Vanilla (H/C)", price: 13000, category: "Coffee", stock: 100 },
+        { name: "Kopi Caramel (H/C)", price: 13000, category: "Coffee", stock: 100 }, { name: "Kopi Butterscoot (H/C)", price: 13000, category: "Coffee", stock: 100 },
+        { name: "Kopi Pandan (H/C)", price: 13000, category: "Coffee", stock: 100 }, { name: "Teh (H/C)", price: 5000, category: "Tea", stock: 100 },
+        { name: "Teh Susu (H/C)", price: 10000, category: "Tea", stock: 100 }, { name: "Teh Tarik (H/C)", price: 13000, category: "Tea", stock: 100 },
+        { name: "Lemon Tea (H/C)", price: 13000, category: "Tea", stock: 100 }, { name: "Thai Tea (H/C)", price: 13000, category: "Tea", stock: 100 },
+        { name: "Green Tea (H/C)", price: 13000, category: "Tea", stock: 100 }, { name: "Milo (H/C)", price: 13000, category: "Chocolate", stock: 100 },
+        { name: "Chocolate (C)", price: 13000, category: "Chocolate", stock: 100 }, { name: "Choco Hazelnut (C)", price: 13000, category: "Chocolate", stock: 100 },
+        { name: "Creamy Choco (C)", price: 13000, category: "Chocolate", stock: 100 }, { name: "Choco Cookies (C)", price: 13000, category: "Chocolate", stock: 100 },
+        { name: "Choco Cheesee (C)", price: 13000, category: "Chocolate", stock: 100 }, { name: "Jus Alpukat (C)", price: 13000, category: "Juice", stock: 100 },
+        { name: "Jus Apel (C)", price: 13000, category: "Juice", stock: 100 }, { name: "Jus Naga (C)", price: 13000, category: "Juice", stock: 100 },
+        { name: "Jeruk Peras (C)", price: 10000, category: "Juice", stock: 100 }, { name: "Air Mineral Gelas", price: 1000, category: "Mineral", stock: 100 },
+        { name: "Air Mineral Botol", price: 5000, category: "Mineral", stock: 100 }
+    ];
+
+    async function autoSeed() { const snap = await getDocs(collection(db, "menus")); if(snap.empty) { for(let item of shakaMenuData) { await addDoc(collection(db, "menus"), item); } } }
+    autoSeed();
 
     window.doLogin = () => {
         const u = document.getElementById('user').value, p = document.getElementById('pass').value;
-        if(u === 'admin' && p === 'shaka123') { document.getElementById('adm-nav').style.display = 'flex'; document.getElementById('loginPage').style.display = 'none'; }
-        else if(u === 'kasir' && p === 'kopi123') { document.getElementById('loginPage').style.display = 'none'; }
+        if(u==='admin' && p==='shaka123') { document.getElementById('adm-nav').style.display='flex'; document.getElementById('loginPage').style.display='none'; }
+        else if(u==='kasir' && p==='kopi123') { document.getElementById('loginPage').style.display='none'; }
         else alert('Akses Ditolak');
     };
 
-    onSnapshot(collection(db, "menus"), (snap) => { menus = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderAll(); });
+    onSnapshot(collection(db, "menus"), (snap) => {
+        menus = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderKasir(); renderAdmin();
+    });
 
-    function renderAll() {
-        const bar = document.getElementById('catBar');
-        const cats = ['ALL', ...new Set(menus.map(m => m.category))];
-        bar.innerHTML = cats.map(c => `<div class="cat-chip ${activeCat === c ? 'active' : ''}" onclick="setCat('${c}')">${c}</div>`).join('');
-        const grid = document.getElementById('menuGrid');
-        const filtered = activeCat === 'ALL' ? menus : menus.filter(m => m.category === activeCat);
-        grid.innerHTML = filtered.map(m => `
-            <div class="menu-item" onclick="addToCart('${m.id}')">
-                <small style="color:var(--primary)">${m.category}</small>
-                <div style="font-weight:700; font-size:0.9rem; margin:5px 0">${m.name}</div>
-                <div style="font-size:0.75rem; color:#888">Rp ${m.price.toLocaleString()}</div>
+    function renderKasir() {
+        document.getElementById('menuGrid').innerHTML = menus.map(m => `
+            <div class="trx-card" style="text-align:center; ${m.stock <= 0 ? 'opacity:0.3; pointer-events:none' : ''}" onclick="addToCart('${m.id}')">
+                <span class="menu-name">${m.name}</span>
+                <span class="menu-price">Rp ${m.price.toLocaleString()}</span>
+                <span class="menu-stock ${m.stock <= 5 ? 'stock-low' : 'stock-safe'}">Stok: ${m.stock}</span>
             </div>`).join('');
-        const adm = document.getElementById('adminList');
-        adm.innerHTML = menus.map(m => `<div class="admin-card"><div><b>${m.name}</b><br><small>Rp ${m.price.toLocaleString()} | Stok: ${m.stock}</small></div><div style="display:flex; gap:8px"><button onclick="openEditMenu('${m.id}')" style="background:var(--primary); border:none; padding:8px 12px; border-radius:8px">✏️</button><button onclick="deleteMenu('${m.id}')" style="background:#222; border:none; padding:8px 12px; border-radius:8px; color:var(--error)">🗑️</button></div></div>`).join('');
     }
 
-    window.setCat = (c) => { activeCat = c; renderAll(); };
     window.addToCart = (id) => {
-        const m = menus.find(x => x.id === id);
-        if(m.stock <= 0) return alert("Habis!");
-        const ex = cart.find(x => x.id === id);
-        if(ex) { if(ex.qty < m.stock) ex.qty++; else return alert("Stok Maks!"); }
-        else cart.push({...m, qty: 1});
-        updateCartUI();
+        const m = menus.find(x => x.id === id); const ex = cart.find(x => x.id === id);
+        if(ex) { if(ex.qty < m.stock) ex.qty++; else { showNotif("Stok Habis!"); return; } } else { cart.push({...m, qty: 1}); }
+        updateCart(); showNotif("+ " + m.name);
     };
 
-    window.adjustQty = (idx, delta) => {
-        const item = cart[idx]; const m = menus.find(x => x.id === item.id);
-        if(delta > 0 && item.qty < m.stock) item.qty++;
-        else if(delta < 0 && item.qty > 1) item.qty--;
-        updateCartUI();
-    };
-
-    function updateCartUI() {
-        const list = document.getElementById('cartList'); let total = 0; list.innerHTML = '';
-        cart.forEach((i, idx) => {
-            total += (i.price * i.qty);
-            list.innerHTML += `<div class="cart-item-row" style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #222; align-items:center">
-                <div style="display:flex; align-items:center; gap:10px"><b class="del-item" style="color:var(--error); cursor:pointer" onclick="cart.splice(${idx},1);updateCartUI()">×</b>
-                <div><div>${i.name}</div><div class="qty-btn-group" style="display:flex; gap:8px; margin-top:5px"><button class="qty-btn" onclick="adjustQty(${idx},-1)">-</button><span style="font-weight:bold; color:var(--primary)">${i.qty}</span><button class="qty-btn" onclick="adjustQty(${idx},1)">+</button></div></div></div>
-                <b>Rp ${(i.price*i.qty).toLocaleString()}</b></div>`;
-        });
-        document.getElementById('totalPrice').innerText = 'Rp ' + total.toLocaleString();
+    function updateCart() {
+        let tot = 0;
+        document.getElementById('cartList').innerHTML = cart.map(i => {
+            tot += (i.price * i.qty);
+            return `<div class="cart-item">
+                <div><b style="color:white">${i.name}</b><br><small style="color:var(--primary)">Rp ${(i.price*i.qty).toLocaleString()}</small></div>
+                <div class="qty-control"><button class="qty-btn" onclick="updateQty('${i.id}',-1)">-</button><b style="min-width:25px; text-align:center; color:white">${i.qty}</b><button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button></div>
+            </div>`;
+        }).join('');
+        document.getElementById('totalPrice').innerText = 'Rp ' + tot.toLocaleString();
     }
 
-    // --- CETAK ENGINE (FIX UNTUK HP) ---
-    window.printReceipt = () => {
-        const name = document.getElementById('cName').value || 'Guest';
-        const meja = document.getElementById('tNum').value || '-';
-        const header = document.getElementById('receiptHeader');
-        header.innerHTML = `<div style="text-align:center;"><h2 style="margin:0;">SHAKA COFFEE</h2><p style="margin:5px 0; font-size:12px;">${formatFullDate(new Date().toISOString())}</p><p style="margin:5px 0; font-size:12px;">Plg: ${name} | Meja: ${meja}</p><div style="border-bottom:1px dashed black; margin:10px 0;"></div></div>`;
-        
-        // Tutup modal dulu agar browser HP tidak blokir print
-        document.getElementById('payModal').style.display = 'none';
-        
-        setTimeout(() => {
-            window.print();
-        }, 350);
-    };
-
-    window.openPay = () => { if(cart.length===0)return; document.getElementById('mTotal').innerText = document.getElementById('totalPrice').innerText; document.getElementById('payModal').style.display='flex'; };
-    window.calcChange = () => { const t = cart.reduce((a,b)=>a+(b.price*b.qty),0), c = document.getElementById('cashInput').value||0; document.getElementById('mChange').innerText = 'Kembali: Rp ' + (c-t>0?(c-t).toLocaleString():0); };
-    
-    window.finishOrder = async () => {
-        const total = cart.reduce((a,b)=>a+(b.price*b.qty),0);
-        try {
-            await addDoc(collection(db, "transactions"), { tgl: new Date().toISOString(), nama: document.getElementById('cName').value || 'Guest', total: total, items: cart.map(c => c.name + ' x' + c.qty) });
-            for(let i of cart) await updateDoc(doc(db, "menus", i.id), { stock: i.stock - i.qty });
-            closeModal(); showToast("✅ BERHASIL"); cart = []; updateCartUI(); document.getElementById('cName').value='';
-        } catch(e) { alert(e); }
+    window.updateQty = (id, delta) => {
+        const i = cart.find(x => x.id === id); const m = menus.find(x => x.id === id);
+        if(delta > 0 && i.qty >= m.stock) return;
+        i.qty += delta; if(i.qty <= 0) cart = cart.filter(x => x.id !== id);
+        updateCart(); if (navigator.vibrate) navigator.vibrate(30);
     };
 
     window.tab = (id, el) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('p-' + id).classList.add('active'); el.classList.add('active');
-        if(id === 'history' || id === 'rekap') loadHistory().then(() => { if(id === 'rekap') filterRekap('hari'); });
+        document.getElementById('p-'+id).classList.add('active'); el.classList.add('active');
+        if(id==='history' || id==='rekap') loadTrxData();
     };
 
-    async function loadHistory() {
+    async function loadTrxData() {
         const snap = await getDocs(query(collection(db, "transactions"), orderBy("tgl", "desc")));
-        allTransactions = snap.docs.map(d => d.data());
-        const list = document.getElementById('hList'); list.innerHTML = '';
-        allTransactions.forEach(t => { list.innerHTML += `<div class="admin-card" style="flex-direction:column; align-items:flex-start"><div style="width:100%; display:flex; justify-content:space-between"><b>${t.nama}</b><b style="color:var(--primary)">Rp ${t.total.toLocaleString()}</b></div><small style="color:#555">${formatFullDate(t.tgl)}</small><small style="color:#444">${t.items.join(', ')}</small></div>`; });
+        allTrx = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        document.getElementById('hList').innerHTML = allTrx.map(t => `<div class="trx-card" style="display:flex; justify-content:space-between; align-items:center"><div><b>${t.nama}</b><br><small style="color:gray">${t.items.join(', ')}</small><br><b style="color:var(--primary)">Rp ${t.total.toLocaleString()}</b></div><button onclick="reprintStruk('${t.id}')" style="background:#333; border:none; padding:10px; border-radius:10px; cursor:pointer">🖨️</button></div>`).join('');
+        initStatsFilters(); runFilter();
     }
 
-    window.filterRekap = (p) => {
-        document.querySelectorAll('#p-rekap .cat-chip').forEach(c => c.classList.remove('active'));
-        document.getElementById('btn-' + p).classList.add('active');
-        const now = new Date(); let total = 0, count = 0;
-        allTransactions.forEach(t => {
-            const d = new Date(t.tgl); let m = false;
-            if(p === 'hari') m = d.toDateString() === now.toDateString();
-            else if(p === 'bulan') m = d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-            else if(p === 'tahun') m = d.getFullYear() === now.getFullYear();
-            if(m) { total += t.total; count++; }
-        });
-        document.getElementById('rekapDisplay').innerHTML = `<div style="background:var(--card); border:1px solid #222; padding:35px; border-radius:25px; text-align:center"><small>PENDAPATAN ${p.toUpperCase()}</small><h1 style="font-size:2.8rem; color:var(--primary); margin:10px 0">Rp ${total.toLocaleString()}</h1><div style="color:#444">${count} Transaksi</div></div>`;
+    function initStatsFilters() {
+        const mSelect = document.getElementById('selMonth'); const ySelect = document.getElementById('selYear');
+        const bulan = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+        mSelect.innerHTML = '<option value="">Pilih Bulan</option>' + bulan.map((b,i) => `<option value="${i}">${b}</option>`).join('');
+        ySelect.innerHTML = '<option value="">Pilih Tahun</option>' + [2024,2025,2026].map(y => `<option value="${y}">${y}</option>`).join('');
+    }
+
+    window.setFilterMode = (mode, el) => {
+        currentFilterMode = mode;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('selDay').style.display = 'none';
+        document.getElementById('selMonth').style.display = mode === 'bulan' ? 'block' : 'none';
+        document.getElementById('selYear').style.display = mode === 'tahun' ? 'block' : 'none';
+        if(mode === 'hari') document.getElementById('selDay').showPicker();
+        if(mode === 'all') runFilter();
     };
 
-    window.openAddMenu = () => { document.getElementById('m-id').value=''; document.getElementById('modalTitle').innerText='Tambah'; document.getElementById('menuModal').style.display='flex'; };
-    window.openEditMenu = (id) => {
-        const m = menus.find(x => x.id === id);
-        document.getElementById('m-id').value = m.id; document.getElementById('m-name').value = m.name;
-        document.getElementById('m-price').value = m.price; document.getElementById('m-stock').value = m.stock;
-        document.getElementById('m-cat').value = m.category; document.getElementById('modalTitle').innerText = 'Edit';
-        document.getElementById('menuModal').style.display = 'flex';
+    window.runFilter = (val) => {
+        let filtered = allTrx; let label = "SEMUA TRANSAKSI";
+        if(currentFilterMode === 'hari' && val) { 
+            filtered = allTrx.filter(t => new Date(t.tgl).toDateString() === new Date(val).toDateString()); 
+            label = "Laporan: " + new Date(val).toLocaleDateString('id-ID'); 
+        } else if(currentFilterMode === 'bulan' && val !== "") { 
+            filtered = allTrx.filter(t => new Date(t.tgl).getMonth() == val); 
+            label = "Laporan Bulanan"; 
+        } else if(currentFilterMode === 'tahun' && val !== "") {
+            filtered = allTrx.filter(t => new Date(t.tgl).getFullYear().toString() === val);
+            label = "Laporan Tahun " + val;
+        }
+        const total = filtered.reduce((a,b)=>a+b.total,0);
+        document.getElementById('rekapSummary').innerHTML = `<div class="trx-card" style="text-align:center; background:linear-gradient(45deg, #2c1e1a, #161616); border:1px solid var(--primary);"><small style="color:var(--primary); font-weight:800; letter-spacing:1px">${label}</small><br><span style="font-size:2.2rem; font-weight:800; color:white">Rp ${total.toLocaleString()}</span></div>`;
+        document.getElementById('rekapDetail').innerHTML = filtered.map(t => `<div class="trx-card" style="display:flex; justify-content:space-between"><div><b>${t.nama}</b><br><small>${new Date(t.tgl).toLocaleTimeString()}</small></div><b style="color:var(--bright-green)">+ Rp ${t.total.toLocaleString()}</b></div>`).join('');
     };
-    window.saveMenu = async () => {
-        const id = document.getElementById('m-id').value, data = { name: document.getElementById('m-name').value, price: parseInt(document.getElementById('m-price').value), stock: parseInt(document.getElementById('m-stock').value), category: document.getElementById('m-cat').value };
-        if(id) await updateDoc(doc(db, "menus", id), data); else await addDoc(collection(db, "menus"), data);
-        closeModal(); showToast("✅ TERSIMPAN");
+
+    window.confirmTrx = async () => {
+        const tot = cart.reduce((a,b)=>a+(b.price*b.qty),0); const pay = parseInt(document.getElementById('payAmount').value) || 0;
+        if(pay < tot) { showNotif("Uang Kurang!"); return; }
+        const data = { tgl: new Date().toISOString(), nama: document.getElementById('cName').value || 'Guest', lokasi: document.getElementById('floorLoc').value, items: cart.map(i => `${i.name} x${i.qty}`), itemDetails: cart.map(i => ({name: i.name, qty: i.qty, price: i.price})), total: tot, bayar: pay, kembali: pay - tot };
+        lastTrxData = data; const batch = writeBatch(db);
+        await addDoc(collection(db, "transactions"), data);
+        cart.forEach(item => { const ref = doc(db, "menus", item.id); batch.update(ref, { stock: item.stock - item.qty }); });
+        await batch.commit();
+        document.getElementById('payModal').style.display='none'; document.getElementById('successModal').style.display='flex';
     };
-    window.deleteMenu = async (id) => { if(confirm("Hapus?")) await deleteDoc(doc(db, "menus", id)); };
-    window.closeModal = () => { document.querySelectorAll('.modal').forEach(m => m.style.display='none'); };
+
+    window.printStrukLastTrx = () => generateStruk(lastTrxData);
+    window.reprintStruk = (id) => generateStruk(allTrx.find(x => x.id === id));
+
+    function generateStruk(t) {
+        if(!t) return;
+        const area = document.getElementById('print-area');
+        area.innerHTML = `<div style="text-align:center"><b>SHAKA COFFEE</b><br>Intelligence Service<br>--------------------------</div><br>Tgl: ${new Date(t.tgl).toLocaleString('id-ID')}<br>Pel: ${t.nama}<br>--------------------------<br>${t.itemDetails.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.name} x${i.qty}</span><span>${(i.price*i.qty).toLocaleString()}</span></div>`).join('')}--------------------------<br><div style="display:flex; justify-content:space-between"><b>TOTAL</b><b>Rp ${t.total.toLocaleString()}</b></div><br><center>Terima Kasih</center>`;
+        window.print();
+    }
+
+    function renderAdmin() {
+        document.getElementById('adminList').innerHTML = menus.map(m => `<div class="trx-card" style="display:flex; justify-content:space-between; align-items:center"><div><b>${m.name}</b><br><small style="color:var(--primary)">Rp ${m.price.toLocaleString()}</small> | <b style="color:var(--bright-green)">${m.stock}</b></div><div style="display:flex; gap:8px"><button onclick="openEditMenu('${m.id}')" style="background:var(--primary); border:none; padding:8px; border-radius:8px">✏️</button><button onclick="delMenu('${m.id}')" style="background:var(--error); border:none; padding:8px; border-radius:8px">🗑️</button></div></div>`).join('');
+    }
+
+    window.openAddMenu = () => { document.getElementById('adm-id').value=''; document.getElementById('adminModal').style.display='flex'; };
+    window.openEditMenu = (id) => { const m = menus.find(x=>x.id===id); document.getElementById('adm-id').value=m.id; document.getElementById('adm-name').value=m.name; document.getElementById('adm-price').value=m.price; document.getElementById('adm-stock').value=m.stock; document.getElementById('adminModal').style.display='flex'; };
+    window.saveAdminMenu = async () => { const id = document.getElementById('adm-id').value; const data = { name: document.getElementById('adm-name').value, price: parseInt(document.getElementById('adm-price').value), stock: parseInt(document.getElementById('adm-stock').value) }; id ? await updateDoc(doc(db,"menus",id), data) : await addDoc(collection(db,"menus"), data); closeModal(); };
+    window.delMenu = async (id) => { if(confirm('Hapus?')) await deleteDoc(doc(db,"menus",id)); };
+    window.closeModal = () => document.querySelectorAll('.modal').forEach(m => m.style.display='none');
+    window.calcChange = () => { const tot = cart.reduce((a,b)=>a+(b.price*b.qty),0); const pay = parseInt(document.getElementById('payAmount').value) || 0; document.getElementById('payChange').innerText = 'Rp ' + (pay-tot).toLocaleString(); };
+    window.resetKasir = () => { cart=[]; updateCart(); document.getElementById('cName').value=''; document.getElementById('successModal').style.display='none'; tab('kasir', document.querySelectorAll('.nav-item')[0]); };
+    window.openPayment = () => { if(cart.length) { document.getElementById('payTotal').innerText = document.getElementById('totalPrice').innerText; document.getElementById('payModal').style.display='flex'; } };
 </script>
 </body>
 </html>

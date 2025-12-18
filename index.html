@@ -283,14 +283,30 @@
         closeModal();
     };
 
-    function formatLine(l, r) { const w = 32; return l + " ".repeat(Math.max(1, w - l.length - r.length)) + r; }
+    // FUNGSI STRUK DIOPTIMALKAN UNTUK PRINTER 58MM (LEBAR 28 KARAKTER)
+    function formatLine(l, r) { 
+        const w = 28; 
+        let spaceNeeded = w - l.length - r.length;
+        if (spaceNeeded < 1) spaceNeeded = 1;
+        return l + " ".repeat(spaceNeeded) + r; 
+    }
+
     function sendToRawBT(t) {
         if(!t) return;
-        let p = "         SHAKA COFFEE\n      --- STRUK KASIR ---\n\n";
-        p += "Tgl: " + new Date(t.tgl).toLocaleString('id-ID') + "\nKasir: " + t.kasir + "\nPel: " + t.nama + " (" + t.lokasi + ")\n";
-        p += "--------------------------------\n";
-        t.itemDetails.forEach(i => { p += i.name.toUpperCase() + "\n" + formatLine(i.qty + " x " + i.price.toLocaleString(), (i.price*i.qty).toLocaleString()) + "\n"; });
-        p += "--------------------------------\n" + formatLine("TOTAL", "Rp " + t.total.toLocaleString()) + "\n" + formatLine("Tunai", t.bayar.toLocaleString()) + "\n" + formatLine("Kembali", t.kembali.toLocaleString()) + "\n\n         Terima Kasih!\n\n\n\n";
+        let p = "        SHAKA COFFEE\n     --- STRUK KASIR ---\n\n";
+        p += "Tgl: " + new Date(t.tgl).toLocaleString('id-ID', {dateStyle:'short', timeStyle:'short'}) + "\n";
+        p += "Kasir: " + t.kasir + "\n";
+        p += "Pel: " + t.nama + " (" + t.lokasi + ")\n";
+        p += "----------------------------\n";
+        t.itemDetails.forEach(i => { 
+            p += i.name.toUpperCase() + "\n";
+            p += formatLine(i.qty + "x " + i.price.toLocaleString(), (i.price*i.qty).toLocaleString()) + "\n"; 
+        });
+        p += "----------------------------\n";
+        p += formatLine("TOTAL", "Rp " + t.total.toLocaleString()) + "\n";
+        p += formatLine("Tunai", t.bayar.toLocaleString()) + "\n";
+        p += formatLine("Kembali", t.kembali.toLocaleString()) + "\n\n";
+        p += "       Terima Kasih!\n\n\n\n";
         window.location.href = "rawbt:" + p;
     }
 

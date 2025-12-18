@@ -15,6 +15,7 @@
         .page.active { display: block; }
         @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
+        /* TAB BUTTONS (LANTAI & STATS) */
         .tab-btn-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .tab-btn { flex: 1; background: #1a1a1a; border: 1px solid #333; color: #777; padding: 12px; border-radius: 15px; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
@@ -268,17 +269,39 @@
         document.getElementById('payModal').style.display='none'; document.getElementById('successModal').style.display='flex';
     };
 
-    window.printStrukLastTrx = () => { generateStruk(lastTrxData); };
-
-    function generateStruk(t) {
-        if(!t) return;
-        const a = document.getElementById('print-area');
-        a.innerHTML = `<div style="text-align:center"><b>SHAKA COFFEE</b><br>--- STRUK KASIR ---</div><br>
-        Tgl: ${new Date(t.tgl).toLocaleString()}<br>Kasir: ${t.kasir}<br>Pel: ${t.nama} (${t.lokasi})<br>--------------------------<br>
-        ${t.itemDetails.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.name} x${i.qty}</span><span>${(i.price*i.qty).toLocaleString()}</span></div>`).join('')}
-        --------------------------<br><b>TOTAL: Rp ${t.total.toLocaleString()}</b><br>Tunai: ${t.bayar.toLocaleString()}<br>Kembali: ${t.kembali.toLocaleString()}`;
-        window.print();
+    // --- FUNGSI RAWBT PRINTER ---
+    function formatLine(left, right) {
+        const maxWidth = 32; 
+        const spaceNeeded = maxWidth - left.length - right.length;
+        return left + " ".repeat(Math.max(1, spaceNeeded)) + right;
     }
+
+    function sendToRawBT(t) {
+        if(!t) return;
+        let p = "ESC@"; 
+        p += "ESCa1" + "SHAKA COFFEE\n";
+        p += "--- STRUK KASIR ---\n\n";
+        p += "ESCa0";
+        p += "Tgl: " + new Date(t.tgl).toLocaleString('id-ID') + "\n";
+        p += "Kasir: " + t.kasir + "\n";
+        p += "Pel: " + t.nama + " (" + t.lokasi + ")\n";
+        p += "-".repeat(32) + "\n";
+        t.itemDetails.forEach(i => {
+            p += i.name + "\n";
+            p += formatLine(i.qty + " x " + i.price.toLocaleString(), (i.price * i.qty).toLocaleString()) + "\n";
+        });
+        p += "-".repeat(32) + "\n";
+        p += "ESC!" + String.fromCharCode(16);
+        p += formatLine("TOTAL", "Rp " + t.total.toLocaleString()) + "\n";
+        p += "ESC!" + String.fromCharCode(0);
+        p += formatLine("Tunai", t.bayar.toLocaleString()) + "\n";
+        p += formatLine("Kembali", t.kembali.toLocaleString()) + "\n";
+        p += "\nESCa1" + "Terima Kasih!\n\n\n\n";
+        window.location.href = "rawbt:" + p;
+    }
+
+    window.printStrukLastTrx = () => sendToRawBT(lastTrxData);
+    window.reprintStruk = (id) => sendToRawBT(allTrx.find(x => x.id === id));
 
     window.tab = (id, el) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -298,44 +321,32 @@
         runFilter();
     }
 
+    // --- FILTER STATS UPDATED ---
     window.setFilterMode = (m, el) => {
         currentFilterMode = m;
         document.querySelectorAll('#p-rekap .filter-btn').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
-        
-        const picker = document.getElementById('selDay');
-        if (m === 'hari') {
-            picker.type = 'date';
-            picker.showPicker();
-        } else if (m === 'bulan' || m === 'tahun') {
-            picker.type = 'month'; // Picker bulan & tahun
-            picker.showPicker();
-        } else {
-            runFilter();
-        }
+        const p = document.getElementById('selDay');
+        if(m === 'hari') { p.type = 'date'; p.showPicker(); }
+        else if(m === 'bulan' || m === 'tahun') { p.type = 'month'; p.showPicker(); }
+        else { runFilter(); }
     };
 
     window.runFilter = (v) => {
-        let f = allTrx; 
-        let l = "SEMUA TRANSAKSI";
-        
-        if (v) {
+        let f = allTrx; let l = "SEMUA TRANSAKSI";
+        if(v) {
             const sd = new Date(v);
-            if (currentFilterMode === 'hari') {
+            if(currentFilterMode === 'hari') {
                 f = allTrx.filter(t => new Date(t.tgl).toDateString() === sd.toDateString());
-                l = "Laporan: " + sd.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-            } else if (currentFilterMode === 'bulan') {
-                f = allTrx.filter(t => {
-                    const d = new Date(t.tgl);
-                    return d.getMonth() === sd.getMonth() && d.getFullYear() === sd.getFullYear();
-                });
-                l = "Laporan: " + sd.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-            } else if (currentFilterMode === 'tahun') {
+                l = "Laporan: " + sd.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric'});
+            } else if(currentFilterMode === 'bulan') {
+                f = allTrx.filter(t => { const d = new Date(t.tgl); return d.getMonth() === sd.getMonth() && d.getFullYear() === sd.getFullYear(); });
+                l = "Laporan: " + sd.toLocaleDateString('id-ID', { month:'long', year:'numeric'});
+            } else if(currentFilterMode === 'tahun') {
                 f = allTrx.filter(t => new Date(t.tgl).getFullYear() === sd.getFullYear());
                 l = "Laporan Tahun: " + sd.getFullYear();
             }
         }
-
         const t = f.reduce((a,b)=>a+b.total,0);
         document.getElementById('rekapSummary').innerHTML = `<div class="trx-card" style="text-align:center; border:1px solid var(--primary);"><small>${l}</small><br><span style="font-size:2rem; font-weight:800">Rp ${t.toLocaleString()}</span></div>`;
         document.getElementById('rekapDetail').innerHTML = f.map(tx => `<div class="trx-card" style="display:flex; justify-content:space-between"><div><b>${tx.nama} (${tx.lokasi})</b><br><small>${tx.kasir}</small></div><b>Rp ${tx.total.toLocaleString()}</b></div>`).join('');
@@ -346,7 +357,6 @@
     window.openPayment = () => { if(cart.length) { document.getElementById('payTotal').innerText = document.getElementById('totalPrice').innerText; document.getElementById('payModal').style.display='flex'; } };
     window.showNotif = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500); };
     window.closeModal = () => document.querySelectorAll('.modal').forEach(m => m.style.display='none');
-    window.reprintStruk = (id) => generateStruk(allTrx.find(x => x.id === id));
     
     // --- ADMIN ---
     window.renderAdmin = () => { 
@@ -359,48 +369,10 @@
                 </div>
             </div>`).join(''); 
     };
-    
-    window.openAddMenu = () => { 
-        document.getElementById('adm-id').value=''; 
-        document.getElementById('adm-name').value=''; 
-        document.getElementById('adm-cat').value=''; 
-        document.getElementById('adm-price').value=''; 
-        document.getElementById('adm-stock').value=''; 
-        document.getElementById('adm-title').innerText = "Input Menu Baru";
-        document.getElementById('adminModal').style.display='flex'; 
-    };
-
-    window.openEditMenu = (id) => { 
-        const m = menus.find(x=>x.id===id); 
-        document.getElementById('adm-id').value=m.id; 
-        document.getElementById('adm-name').value=m.name; 
-        document.getElementById('adm-cat').value=m.category; 
-        document.getElementById('adm-price').value=m.price; 
-        document.getElementById('adm-stock').value=m.stock; 
-        document.getElementById('adm-title').innerText = "Edit Menu";
-        document.getElementById('adminModal').style.display='flex'; 
-    };
-
-    window.deleteMenu = async (id) => {
-        if(confirm("Hapus menu ini secara permanen?")) {
-            await deleteDoc(doc(db, "menus", id));
-            showNotif("Menu Dihapus");
-        }
-    };
-
-    window.saveAdminMenu = async () => { 
-        const id = document.getElementById('adm-id').value; 
-        const cat = document.getElementById('adm-cat').value;
-        if(!cat) return alert("Pilih Kategori!");
-        const d = { 
-            name: document.getElementById('adm-name').value, 
-            category: cat, 
-            price: parseInt(document.getElementById('adm-price').value), 
-            stock: parseInt(document.getElementById('adm-stock').value) 
-        }; 
-        id ? await updateDoc(doc(db,"menus",id), d) : await addDoc(collection(db,"menus"), d); 
-        closeModal(); 
-    };
+    window.openAddMenu = () => { document.getElementById('adm-id').value=''; document.getElementById('adm-name').value=''; document.getElementById('adm-cat').value=''; document.getElementById('adm-price').value=''; document.getElementById('adm-stock').value=''; document.getElementById('adm-title').innerText = "Input Menu Baru"; document.getElementById('adminModal').style.display='flex'; };
+    window.openEditMenu = (id) => { const m = menus.find(x=>x.id===id); document.getElementById('adm-id').value=m.id; document.getElementById('adm-name').value=m.name; document.getElementById('adm-cat').value=m.category; document.getElementById('adm-price').value=m.price; document.getElementById('adm-stock').value=m.stock; document.getElementById('adm-title').innerText = "Edit Menu"; document.getElementById('adminModal').style.display='flex'; };
+    window.deleteMenu = async (id) => { if(confirm("Hapus menu ini secara permanen?")) { await deleteDoc(doc(db, "menus", id)); showNotif("Menu Dihapus"); } };
+    window.saveAdminMenu = async () => { const id = document.getElementById('adm-id').value; const cat = document.getElementById('adm-cat').value; if(!cat) return alert("Pilih Kategori!"); const d = { name: document.getElementById('adm-name').value, category: cat, price: parseInt(document.getElementById('adm-price').value), stock: parseInt(document.getElementById('adm-stock').value) }; id ? await updateDoc(doc(db,"menus",id), d) : await addDoc(collection(db,"menus"), d); closeModal(); };
 </script>
 </body>
 </html>

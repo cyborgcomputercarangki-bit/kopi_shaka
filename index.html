@@ -15,7 +15,6 @@
         .page.active { display: block; }
         @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* TAB BUTTONS (LANTAI & STATS) */
         .tab-btn-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .tab-btn { flex: 1; background: #1a1a1a; border: 1px solid #333; color: #777; padding: 12px; border-radius: 15px; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
@@ -90,6 +89,7 @@
             <div class="filter-btn active" onclick="filterCat('ALL', this)">SEMUA</div>
             <div class="filter-btn" onclick="filterCat('COFFEE', this)">COFFEE</div>
             <div class="filter-btn" onclick="filterCat('TEA', this)">TEA</div>
+            <div class="filter-btn" onclick="filterCat('COKELAT', this)">COKELAT</div>
             <div class="filter-btn" onclick="filterCat('SNACK', this)">SNACK</div>
             <div class="filter-btn" onclick="filterCat('JUICE', this)">JUICE</div>
         </div>
@@ -160,6 +160,7 @@
             <option value="" disabled selected>Pilih Kategori</option>
             <option value="COFFEE">COFFEE</option>
             <option value="TEA">TEA</option>
+            <option value="COKELAT">COKELAT</option>
             <option value="SNACK">SNACK</option>
             <option value="JUICE">JUICE</option>
         </select>
@@ -269,7 +270,6 @@
         document.getElementById('payModal').style.display='none'; document.getElementById('successModal').style.display='flex';
     };
 
-    // --- FUNGSI RAWBT PRINTER ---
     function formatLine(left, right) {
         const maxWidth = 32; 
         const spaceNeeded = maxWidth - left.length - right.length;
@@ -315,13 +315,17 @@
         allTrx = s.docs.map(d => ({id: d.id, ...d.data()}));
         document.getElementById('hList').innerHTML = allTrx.map(t => `
             <div class="trx-card" style="display:flex; justify-content:space-between; align-items:center">
-                <div><small>${new Date(t.tgl).toLocaleString()} - ${t.kasir}</small><br><b>${t.nama} (${t.lokasi})</b><br><b style="color:var(--primary)">Rp ${t.total.toLocaleString()}</b></div>
+                <div>
+                    <small>${new Date(t.tgl).toLocaleString()} - ${t.kasir}</small><br>
+                    <b>${t.nama} (${t.lokasi})</b><br>
+                    <small style="color:var(--text-dim); font-size:0.65rem;">${t.items.join(', ')}</small><br>
+                    <b style="color:var(--primary)">Rp ${t.total.toLocaleString()}</b>
+                </div>
                 <button onclick="reprintStruk('${t.id}')" style="background:#333; border:none; padding:10px; border-radius:10px">🖨️</button>
             </div>`).join('');
         runFilter();
     }
 
-    // --- FILTER STATS UPDATED ---
     window.setFilterMode = (m, el) => {
         currentFilterMode = m;
         document.querySelectorAll('#p-rekap .filter-btn').forEach(b => b.classList.remove('active'));
@@ -358,7 +362,6 @@
     window.showNotif = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500); };
     window.closeModal = () => document.querySelectorAll('.modal').forEach(m => m.style.display='none');
     
-    // --- ADMIN ---
     window.renderAdmin = () => { 
         document.getElementById('adminList').innerHTML = menus.map(m => `
             <div class="trx-card" style="display:flex; justify-content:space-between; align-items:center">

@@ -283,9 +283,9 @@
         closeModal();
     };
 
-    // FUNGSI STRUK KHUSUS 58MM - DENGAN PERINTAH FONT KECIL (\x1b\x21\x01)
+    // FUNGSI STRUK FIXED 30 CHAR UNTUK 384 DOTS
     function formatLine(l, r) { 
-        const w = 32; // Lebar standar Font B pada printer 58mm
+        const w = 30; 
         let spaceNeeded = w - l.length - r.length;
         if (spaceNeeded < 1) spaceNeeded = 1;
         return l + " ".repeat(spaceNeeded) + r; 
@@ -293,29 +293,21 @@
 
     function sendToRawBT(t) {
         if(!t) return;
-        let p = "\x1b\x21\x00"; // Reset font normal
-        p += "      SHAKA COFFEE\n   --- STRUK KASIR ---\n\n";
-        
-        p += "\x1b\x21\x01"; // AKTIFKAN FONT KECIL (Mode Font B)
-        p += "Tgl  : " + new Date(t.tgl).toLocaleString('id-ID', {dateStyle:'short', timeStyle:'short'}) + "\n";
+        let p = "       SHAKA COFFEE\n    --- STRUK KASIR ---\n\n";
+        p += "Tgl: " + new Date(t.tgl).toLocaleString('id-ID', {dateStyle:'short', timeStyle:'short'}) + "\n";
         p += "Kasir: " + t.kasir + "\n";
-        p += "Pel  : " + t.nama + "\n";
-        p += "Lok  : " + t.lokasi + "\n";
-        p += "--------------------------------\n";
-        
+        p += "Pel: " + t.nama + "\n";
+        p += "Lok: " + t.lokasi + "\n";
+        p += "------------------------------\n";
         t.itemDetails.forEach(i => { 
             p += i.name.toUpperCase() + "\n";
-            let leftSide = i.qty + " x " + i.price.toLocaleString();
-            let rightSide = (i.price * i.qty).toLocaleString();
-            p += formatLine(leftSide, rightSide) + "\n"; 
+            p += formatLine(i.qty + "x " + i.price.toLocaleString(), (i.price*i.qty).toLocaleString()) + "\n"; 
         });
-        
-        p += "--------------------------------\n";
+        p += "------------------------------\n";
         p += formatLine("TOTAL", "Rp " + t.total.toLocaleString()) + "\n";
-        p += formatLine("TUNAI", t.bayar.toLocaleString()) + "\n";
-        p += formatLine("KEMBALI", t.kembali.toLocaleString()) + "\n\n";
-        p += "       TERIMA KASIH!\n\n\n\n\x1b\x21\x00";
-        
+        p += formatLine("Tunai", t.bayar.toLocaleString()) + "\n";
+        p += formatLine("Kembali", t.kembali.toLocaleString()) + "\n\n";
+        p += "      Terima Kasih!\n\n\n\n";
         window.location.href = "rawbt:" + p;
     }
 

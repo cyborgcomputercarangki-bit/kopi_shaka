@@ -19,11 +19,17 @@
         .tab-btn { flex: 1; background: #1a1a1a; border: 1px solid #333; color: #777; padding: 12px; border-radius: 15px; font-size: 0.75rem; font-weight: 800; cursor: pointer; text-align: center; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
 
-        .filter-group { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; scrollbar-width: none; }
-        .filter-btn { background: #1a1a1a; border: 1px solid #333; color: #777; padding: 10px 18px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        .filter-group { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+        .filter-group::-webkit-scrollbar { display: none; }
+        .filter-btn { flex: 0 0 auto; background: #1a1a1a; border: 1px solid #333; color: #777; padding: 10px 18px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; cursor: pointer; white-space: nowrap; transition: 0.3s; letter-spacing: 1px; }
         .filter-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
 
-        .trx-card { background: var(--card); border: 1px solid #222; border-radius: 20px; padding: 18px; margin-bottom: 12px; transition: all 0.3s ease; position: relative; }
+        /* Style Card Baru dengan Gambar */
+        .trx-card { background: var(--card); border: 1px solid #222; border-radius: 20px; padding: 18px; margin-bottom: 12px; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .img-container { width: 100%; height: 110px; background: #111; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .trx-card:active .img-container img { transform: scale(1.1); }
+
         .menu-name { color: #ffffff; font-weight: 800; font-size: 0.85rem; display: block; margin-bottom: 4px; line-height: 1.2; }
         .menu-price { color: var(--primary); font-weight: 600; font-size: 0.8rem; display: block; }
         .menu-stock { font-size: 0.65rem; font-weight: 800; display: inline-block; margin-top: 8px; padding: 3px 10px; border-radius: 8px; }
@@ -41,8 +47,9 @@
 
         input, select { background: #222; border: 1px solid #333; color: white; padding: 15px; border-radius: 18px; width: 100%; margin-bottom: 12px; outline: none; appearance: none; }
         .btn-main { background: var(--primary); color: #000; border: none; padding: 16px; border-radius: 18px; font-weight: 800; width: 100%; cursor: pointer; }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
-        .modal-content { background: var(--card); padding: 30px; border-radius: 35px; width: 100%; max-width: 400px; border: 1px solid #333; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 35px; width: 100%; max-width: 400px; border: 1px solid #333; max-height: 90vh; overflow-y: auto; }
         #toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: var(--primary); color: black; padding: 12px 25px; border-radius: 50px; font-weight: 800; font-size: 0.85rem; z-index: 5000; display: none; }
     </style>
 </head>
@@ -84,16 +91,19 @@
             <div id="f2" class="tab-btn" onclick="setFloor('Lantai 2')">LANTAI 2</div>
         </div>
         <input type="text" id="menuSearch" placeholder="Cari Menu..." style="margin-bottom:15px">
+        
         <div class="filter-group" id="catBarKasir">
-            <div class="filter-btn active" onclick="filterCat('ALL', this)">SEMUA</div>
-            <div class="filter-btn" onclick="filterCat('COFFEE', this)">COFFEE</div>
-            <div class="filter-btn" onclick="filterCat('TEA', this)">TEA</div>
-            <div class="filter-btn" onclick="filterCat('COKELAT', this)">COKELAT</div>
-            <div class="filter-btn" onclick="filterCat('SQUASH', this)">SQUASH</div>
-            <div class="filter-btn" onclick="filterCat('MILKSHAKE', this)">MILKSHAKE</div>
-            <div class="filter-btn" onclick="filterCat('SNACK', this)">SNACK</div>
+            <div class="filter-btn active" onclick="filterCat('ALL', this)">🏠 SEMUA</div>
+            <div class="filter-btn" onclick="filterCat('COFFEE', this)">☕ COFFEE</div>
+            <div class="filter-btn" onclick="filterCat('TEA', this)">🍃 TEA</div>
+            <div class="filter-btn" onclick="filterCat('COKELAT', this)">🍫 COKELAT</div>
+            <div class="filter-btn" onclick="filterCat('SQUASH', this)">🍹 SQUASH</div>
+            <div class="filter-btn" onclick="filterCat('MILKSHAKE', this)">🥤 MILKSHAKE</div>
+            <div class="filter-btn" onclick="filterCat('SNACK', this)">🥐 SNACK</div>
         </div>
-        <div id="menuGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:12px;"></div>
+
+        <div id="menuGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:12px;"></div>
+        
         <div style="background:rgba(255,255,255,0.03); border-radius:30px; padding:25px; margin-top:30px; border:1px solid #222;">
             <div id="cartList"></div>
             <div style="display:flex; justify-content:space-between; margin:20px 0">
@@ -126,7 +136,7 @@
         <h2 style="color:var(--primary)">Inventory</h2>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
             <button class="btn-main" onclick="openAddMenu()">+ TAMBAH MENU</button>
-            <button class="btn-main" style="background:#444; color:white;" onclick="importFotoMenu()">⚡ IMPORT DATA</button>
+            <button class="btn-main" style="background:#444; color:white;" onclick="alert('Fitur Import nonaktif dalam mode gambar Base64')">⚡ IMPORT DATA</button>
         </div>
         <div id="adminList"></div>
     </div>
@@ -146,19 +156,31 @@
     <div class="modal-content">
         <h2 id="adm-title">Input Menu</h2>
         <input type="hidden" id="adm-id">
+        
+        <div id="img-preview-container" style="width:100%; height:150px; background:#222; border-radius:18px; margin-bottom:15px; overflow:hidden; display:flex; align-items:center; justify-content:center; border:1px dashed #444;">
+            <img id="img-preview" src="" style="display:none; width:100%; height:100%; object-fit:cover;">
+            <span id="img-placeholder" style="color:#555; font-size:0.7rem; font-weight:800;">📷 BELUM ADA FOTO</span>
+        </div>
+
         <input type="text" id="adm-name" placeholder="Nama Menu">
         <select id="adm-cat">
-            <option value="COFFEE">COFFEE</option>
-            <option value="TEA">TEA</option>
-            <option value="COKELAT">COKELAT</option>
-            <option value="SQUASH">SQUASH</option>
-            <option value="MILKSHAKE">MILKSHAKE</option>
-            <option value="SNACK">SNACK</option>
+            <option value="COFFEE">☕ COFFEE</option>
+            <option value="TEA">🍃 TEA</option>
+            <option value="COKELAT">🍫 COKELAT</option>
+            <option value="SQUASH">🍹 SQUASH</option>
+            <option value="MILKSHAKE">🥤 MILKSHAKE</option>
+            <option value="SNACK">🥐 SNACK</option>
         </select>
         <input type="number" id="adm-price" placeholder="Harga Jual">
         <input type="number" id="adm-stock" placeholder="Stok">
+        
+        <label for="adm-file" style="display:block; background:#333; color:var(--primary); padding:15px; border-radius:15px; text-align:center; font-size:0.75rem; font-weight:800; cursor:pointer; margin-bottom:12px; border:1px solid var(--primary);">
+            📷 AMBIL FOTO PRODUK
+        </label>
+        <input type="file" id="adm-file" accept="image/*" style="display:none" onchange="previewImage(this)">
+
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px">
-            <button class="btn-main" onclick="saveAdminMenu()">SIMPAN</button>
+            <button class="btn-main" id="btnSaveAdmin" onclick="saveAdminMenu()">SIMPAN</button>
             <button class="btn-main" style="background:none; border:1px solid #444; color:white" onclick="closeModal()">BATAL</button>
         </div>
     </div>
@@ -170,9 +192,10 @@
 
     const firebaseConfig = { apiKey: "AIzaSyAf4pkzvpCuzmXquzIoCDXLAr6-_l3i8O0", authDomain: "kopi-shaka.firebaseapp.com", projectId: "kopi-shaka", storageBucket: "kopi-shaka.firebasestorage.app", messagingSenderId: "947498895962", appId: "1:947498895962:web:ebb8bc420bdbc47e086663" };
     const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-    let menus = [], cart = [], allTrx = [], currentFilterMode = 'all', lastTrxData = null, selectedCat = 'ALL', currentUser = '', currentFloor = 'Lantai 1';
+    
+    let menus = [], cart = [], allTrx = [], currentFilterMode = 'all', lastTrxData = null, selectedCat = 'ALL', currentUser = '', currentFloor = 'Lantai 1', base64String = "";
 
-    // LOGIKA LOGIN BARU
+    // LOGIN LOGIC
     window.loginAsKasir = () => {
         currentUser = "PUSPA";
         document.getElementById('activeUser').innerText = "KASIR: " + currentUser;
@@ -209,25 +232,116 @@
         if(id==='history' || id==='rekap') loadTrxData();
     };
 
+    // REALTIME DATABASE
     onSnapshot(collection(db, "menus"), (snap) => {
         menus = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => a.name.localeCompare(b.name));
         renderMenuGrid(); renderAdmin();
     });
 
     window.setFloor = (fl) => { currentFloor = fl; document.getElementById('f1').classList.toggle('active', fl === 'Lantai 1'); document.getElementById('f2').classList.toggle('active', fl === 'Lantai 2'); };
-    window.filterCat = (cat, el) => { selectedCat = cat; document.querySelectorAll('#p-kasir .filter-btn').forEach(c => c.classList.remove('active')); el.classList.add('active'); renderMenuGrid(); };
     
+    window.filterCat = (cat, el) => { 
+        selectedCat = cat; 
+        document.querySelectorAll('#p-kasir .filter-btn').forEach(c => c.classList.remove('active')); 
+        el.classList.add('active'); 
+        renderMenuGrid(); 
+    };
+
+    // RENDER MENU DENGAN GAMBAR
     function renderMenuGrid() {
         const s = document.getElementById('menuSearch').value.toLowerCase();
         const f = menus.filter(m => (selectedCat === 'ALL' || m.category === selectedCat) && m.name.toLowerCase().includes(s));
+        
         document.getElementById('menuGrid').innerHTML = f.map(m => `
-            <div class="trx-card" style="text-align:center; ${m.stock <= 0 ? 'opacity:0.3; pointer-events:none' : ''}" onclick="addToCart('${m.id}')">
-                <span class="menu-name">${m.name}</span>
-                <span class="menu-price">Rp ${m.price.toLocaleString()}</span>
-                <span class="menu-stock ${m.stock <= 5 ? 'stock-low' : 'stock-safe'}">Stok: ${m.stock}</span>
+            <div class="trx-card" style="padding:0; ${m.stock <= 0 ? 'opacity:0.3; pointer-events:none' : ''}" onclick="addToCart('${m.id}')">
+                <div class="img-container">
+                    ${m.image ? `<img src="${m.image}" loading="lazy">` : `<span style="font-size:2rem; opacity:0.1;">☕</span>`}
+                </div>
+                <div style="padding:12px; text-align:center;">
+                    <span class="menu-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</span>
+                    <span class="menu-price">Rp ${m.price.toLocaleString()}</span>
+                    <span class="menu-stock ${m.stock <= 5 ? 'stock-low' : 'stock-safe'}">${m.stock <= 0 ? 'HABIS' : 'STOK: '+m.stock}</span>
+                </div>
             </div>`).join('');
     }
 
+    // IMAGE PROCESSING (BASE64 + COMPRESSION)
+    window.previewImage = (input) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 400; 
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    base64String = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    document.getElementById('img-preview').src = base64String;
+                    document.getElementById('img-preview').style.display = 'block';
+                    document.getElementById('img-placeholder').style.display = 'none';
+                };
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    window.saveAdminMenu = async () => {
+        const btn = document.getElementById('btnSaveAdmin');
+        const id = document.getElementById('adm-id').value;
+        const name = document.getElementById('adm-name').value;
+        if(!name) return alert("Nama menu wajib!");
+
+        btn.innerText = "PROSES...";
+        btn.disabled = true;
+
+        const d = { 
+            name: name, 
+            category: document.getElementById('adm-cat').value, 
+            price: parseInt(document.getElementById('adm-price').value) || 0, 
+            stock: parseInt(document.getElementById('adm-stock').value) || 0,
+            image: base64String 
+        };
+
+        try {
+            id ? await updateDoc(doc(db,"menus",id), d) : await addDoc(collection(db,"menus"), d);
+            closeModal();
+            base64String = "";
+        } catch(e) { alert("Error: " + e.message); }
+        btn.innerText = "SIMPAN";
+        btn.disabled = false;
+    };
+
+    window.editMenu = (id) => {
+        const m = menus.find(x => x.id === id);
+        document.getElementById('adm-id').value = m.id;
+        document.getElementById('adm-name').value = m.name;
+        document.getElementById('adm-cat').value = m.category;
+        document.getElementById('adm-price').value = m.price;
+        document.getElementById('adm-stock').value = m.stock;
+        
+        const preview = document.getElementById('img-preview');
+        const placeholder = document.getElementById('img-placeholder');
+        if(m.image) {
+            base64String = m.image;
+            preview.src = m.image;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+        } else {
+            base64String = "";
+            preview.style.display = 'none';
+            placeholder.style.display = 'block';
+        }
+        document.getElementById('adm-title').innerText = "Edit Menu";
+        document.getElementById('adminModal').style.display = 'flex';
+    };
+
+    // KASIR FUNCTIONS
     window.addToCart = (id) => {
         const m = menus.find(x => x.id === id); const ex = cart.find(x => x.id === id);
         if(ex) { if(ex.qty < m.stock) ex.qty++; else return showNotif("Stok Habis!"); } else { cart.push({...m, qty: 1}); }
@@ -245,11 +359,23 @@
 
     window.updateQty = (id, delta) => { const i = cart.find(x => x.id === id); i.qty += delta; if(i.qty <= 0) cart = cart.filter(x => x.id !== id); updateCart(); };
 
+    // TRANSAKSI & STRUK
+    window.confirmTrx = async () => {
+        const tot = cart.reduce((a,b)=>a+(b.price*b.qty),0); const pay = parseInt(document.getElementById('payAmount').value) || 0;
+        if(pay < tot) return alert("Uang Kurang!");
+        const d = { tgl: new Date().toISOString(), nama: document.getElementById('cName').value || 'Guest', lokasi: currentFloor, kasir: currentUser, itemDetails: cart.map(i => ({name: i.name, qty: i.qty, price: i.price})), total: tot, bayar: pay, kembali: pay - tot };
+        lastTrxData = d; const b = writeBatch(db);
+        await addDoc(collection(db, "transactions"), d);
+        cart.forEach(it => { b.update(doc(db, "menus", it.id), { stock: it.stock - it.qty }); });
+        await b.commit(); document.getElementById('payModal').style.display='none'; document.getElementById('successModal').style.display='flex';
+    };
+
+    // HISTORY & REKAP
     async function loadTrxData() {
         const s = await getDocs(query(collection(db, "transactions"), orderBy("tgl", "desc")));
         allTrx = s.docs.map(d => ({id: d.id, ...d.data()}));
         document.getElementById('hList').innerHTML = allTrx.map(t => {
-            const itemsText = t.itemDetails ? t.itemDetails.map(it => `${it.name} (x${it.qty})`).join(', ') : t.items.join(', ');
+            const itemsText = t.itemDetails ? t.itemDetails.map(it => `${it.name} (x${it.qty})`).join(', ') : '';
             return `<div class="trx-card" style="display:flex; justify-content:space-between; align-items:center">
                 <div style="flex:1">
                     <small>${new Date(t.tgl).toLocaleString()}</small><br>
@@ -262,14 +388,6 @@
         }).join('');
         runFilter();
     }
-
-    window.setFilterMode = (m, el) => {
-        currentFilterMode = m;
-        document.querySelectorAll('#p-rekap .filter-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        const p = document.getElementById('selDay');
-        if(m !== 'all') { p.type = (m==='hari'?'date':'month'); p.showPicker(); } else { runFilter(); }
-    };
 
     window.runFilter = (v) => {
         let f = allTrx;
@@ -284,10 +402,24 @@
         document.getElementById('rekapDetail').innerHTML = f.map(tx => `<div class="trx-card" style="display:flex; justify-content:space-between"><div><b>${tx.nama}</b><br><small>${tx.kasir}</small></div><b>Rp ${tx.total.toLocaleString()}</b></div>`).join('');
     };
 
+    window.setFilterMode = (m, el) => {
+        currentFilterMode = m;
+        document.querySelectorAll('#p-rekap .filter-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        const p = document.getElementById('selDay');
+        if(m !== 'all') { p.type = (m==='hari'?'date':'month'); p.showPicker(); } else { runFilter(); }
+    };
+
+    // UTILITIES
     window.renderAdmin = () => {
         document.getElementById('adminList').innerHTML = menus.map(m => `
             <div class="trx-card" style="display:flex; justify-content:space-between; align-items:center">
-                <div><b>${m.name}</b><br><small>Rp ${m.price.toLocaleString()} | Stok: ${m.stock}</small></div>
+                <div style="display:flex; align-items:center; gap:10px">
+                    <div style="width:40px; height:40px; border-radius:8px; overflow:hidden; background:#222">
+                        ${m.image ? `<img src="${m.image}" style="width:100%; height:100%; object-fit:cover">` : ''}
+                    </div>
+                    <div><b>${m.name}</b><br><small>Rp ${m.price.toLocaleString()} | Stok: ${m.stock}</small></div>
+                </div>
                 <div style="display:flex; gap:8px">
                     <button onclick="editMenu('${m.id}')" style="background:var(--primary); border:none; padding:10px; border-radius:10px">✏️</button>
                     <button onclick="deleteMenu('${m.id}')" style="background:var(--error); border:none; padding:10px; border-radius:10px">🗑️</button>
@@ -295,43 +427,31 @@
             </div>`).join('');
     };
 
-    window.editMenu = (id) => {
-        const m = menus.find(x => x.id === id);
-        document.getElementById('adm-id').value = m.id;
-        document.getElementById('adm-name').value = m.name;
-        document.getElementById('adm-cat').value = m.category;
-        document.getElementById('adm-price').value = m.price;
-        document.getElementById('adm-stock').value = m.stock;
-        document.getElementById('adm-title').innerText = "Edit Menu";
-        document.getElementById('adminModal').style.display = 'flex';
+    window.openAddMenu = () => { 
+        document.getElementById('adm-id').value=''; 
+        document.getElementById('img-preview').style.display='none';
+        document.getElementById('img-placeholder').style.display='block';
+        base64String = "";
+        document.getElementById('adm-title').innerText="Tambah Menu"; 
+        document.getElementById('adminModal').style.display='flex'; 
     };
 
-    window.saveAdminMenu = async () => {
-        const id = document.getElementById('adm-id').value;
-        const d = { name: document.getElementById('adm-name').value, category: document.getElementById('adm-cat').value, price: parseInt(document.getElementById('adm-price').value), stock: parseInt(document.getElementById('adm-stock').value) };
-        id ? await updateDoc(doc(db,"menus",id), d) : await addDoc(collection(db,"menus"), d);
-        closeModal();
-    };
-
-    function formatLine(l, r) { 
-        const w = 30; 
-        let spaceNeeded = w - l.length - r.length;
-        if (spaceNeeded < 1) spaceNeeded = 1;
-        return l + " ".repeat(spaceNeeded) + r; 
-    }
-
+    window.closeModal = () => document.querySelectorAll('.modal').forEach(m => m.style.display='none');
+    window.deleteMenu = async (id) => { if(confirm("Hapus?")) await deleteDoc(doc(db, "menus", id)); };
+    window.showNotif = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500); };
+    window.resetKasir = () => { cart=[]; updateCart(); document.getElementById('cName').value=''; document.getElementById('successModal').style.display='none'; tab('kasir', document.querySelectorAll('.nav-item')[0]); };
+    window.openPayment = () => { if(cart.length) { document.getElementById('payTotal').innerText = document.getElementById('totalPrice').innerText; document.getElementById('payModal').style.display='flex'; } };
+    window.calcChange = () => { const t = cart.reduce((a,b)=>a+(b.price*b.qty),0); const p = parseInt(document.getElementById('payAmount').value) || 0; document.getElementById('payChange').innerText = 'Rp ' + (p-t).toLocaleString(); };
+    
+    // STRUK RAWBT
+    function formatLine(l, r) { const w = 30; let s = w - l.length - r.length; return l + " ".repeat(s < 1 ? 1 : s) + r; }
     function sendToRawBT(t) {
         if(!t) return;
         let p = "        SHAKA COFFEE\n    --- STRUK KASIR ---\n\n";
-        p += "Tgl: " + new Date(t.tgl).toLocaleString('id-ID', {dateStyle:'short', timeStyle:'short'}) + "\n";
-        p += "Kasir: " + t.kasir + "\n";
-        p += "Pel: " + t.nama + "\n";
-        p += "Lok: " + t.lokasi + "\n";
+        p += "Tgl: " + new Date(t.tgl).toLocaleString('id-ID') + "\n";
+        p += "Kasir: " + t.kasir + "\nPel: " + t.nama + "\nLok: " + t.lokasi + "\n";
         p += "------------------------------\n";
-        t.itemDetails.forEach(i => { 
-            p += i.name.toUpperCase() + "\n";
-            p += formatLine(i.qty + "x " + i.price.toLocaleString(), (i.price*i.qty).toLocaleString()) + "\n"; 
-        });
+        t.itemDetails.forEach(i => { p += i.name.toUpperCase() + "\n" + formatLine(i.qty + "x " + i.price.toLocaleString(), (i.price*i.qty).toLocaleString()) + "\n"; });
         p += "------------------------------\n";
         p += formatLine("TOTAL", "Rp " + t.total.toLocaleString()) + "\n";
         p += formatLine("Tunai", t.bayar.toLocaleString()) + "\n";
@@ -339,26 +459,9 @@
         p += "      Terima Kasih!\n\n\n\n";
         window.location.href = "rawbt:" + p;
     }
-
-    window.confirmTrx = async () => {
-        const tot = cart.reduce((a,b)=>a+(b.price*b.qty),0); const pay = parseInt(document.getElementById('payAmount').value) || 0;
-        if(pay < tot) return alert("Uang Kurang!");
-        const d = { tgl: new Date().toISOString(), nama: document.getElementById('cName').value || 'Guest', lokasi: currentFloor, kasir: currentUser, itemDetails: cart.map(i => ({name: i.name, qty: i.qty, price: i.price})), total: tot, bayar: pay, kembali: pay - tot };
-        lastTrxData = d; const b = writeBatch(db);
-        await addDoc(collection(db, "transactions"), d);
-        cart.forEach(it => { b.update(doc(db, "menus", it.id), { stock: it.stock - it.qty }); });
-        await b.commit(); document.getElementById('payModal').style.display='none'; document.getElementById('successModal').style.display='flex';
-    };
-
     window.printStrukLastTrx = () => sendToRawBT(lastTrxData);
     window.reprintStruk = (id) => sendToRawBT(allTrx.find(x => x.id === id));
-    window.openAddMenu = () => { document.getElementById('adm-id').value=''; document.getElementById('adm-title').innerText="Tambah Menu"; document.getElementById('adminModal').style.display='flex'; };
-    window.closeModal = () => document.querySelectorAll('.modal').forEach(m => m.style.display='none');
-    window.deleteMenu = async (id) => { if(confirm("Hapus?")) await deleteDoc(doc(db, "menus", id)); };
-    window.showNotif = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500); };
-    window.resetKasir = () => { cart=[]; updateCart(); document.getElementById('cName').value=''; document.getElementById('successModal').style.display='none'; tab('kasir', document.querySelectorAll('.nav-item')[0]); };
-    window.openPayment = () => { if(cart.length) { document.getElementById('payTotal').innerText = document.getElementById('totalPrice').innerText; document.getElementById('payModal').style.display='flex'; } };
-    window.calcChange = () => { const t = cart.reduce((a,b)=>a+(b.price*b.qty),0); const p = parseInt(document.getElementById('payAmount').value) || 0; document.getElementById('payChange').innerText = 'Rp ' + (p-t).toLocaleString(); };
+    document.getElementById('menuSearch').oninput = () => renderMenuGrid();
 </script>
 </body>
 </html>

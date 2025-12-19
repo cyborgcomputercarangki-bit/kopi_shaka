@@ -54,9 +54,17 @@
     <div style="background:var(--card); padding:50px 40px; border-radius:45px; width:100%; max-width:400px; text-align:center; border:1px solid #222;">
         <h1 style="color:var(--primary); font-weight:800; letter-spacing:5px; margin:0;">SHAKA</h1>
         <p style="color:var(--bright-green); font-size:0.75rem; margin-bottom:40px; font-weight:800; letter-spacing:2px;">COFFEE INTELLIGENCE</p>
-        <input type="text" id="user" placeholder="Nama Kasir">
-        <input type="password" id="pass" placeholder="Password (Admin)">
-        <button class="btn-main" onclick="doLogin()">SIGN IN</button>
+        
+        <div id="loginOptions">
+            <button class="btn-main" onclick="loginAsKasir()" style="margin-bottom: 15px;">KASIR</button>
+            <button class="btn-main" onclick="showAdminLogin()" style="background:#444; color:white;">ADMIN</button>
+        </div>
+
+        <div id="adminLoginForm" style="display:none;">
+            <input type="password" id="pass" placeholder="Password Admin">
+            <button class="btn-main" onclick="doAdminLogin()">SIGN IN ADMIN</button>
+            <button class="btn-main" onclick="backToOptions()" style="background:none; color:var(--text-dim); margin-top:10px; font-size:0.7rem;">KEMBALI</button>
+        </div>
     </div>
 </div>
 
@@ -164,12 +172,34 @@
     const app = initializeApp(firebaseConfig); const db = getFirestore(app);
     let menus = [], cart = [], allTrx = [], currentFilterMode = 'all', lastTrxData = null, selectedCat = 'ALL', currentUser = '', currentFloor = 'Lantai 1';
 
-    window.doLogin = () => {
-        const u = document.getElementById('user').value, p = document.getElementById('pass').value;
-        if(!u) return alert("Masukkan Nama");
-        currentUser = u.toUpperCase(); document.getElementById('activeUser').innerText = "KASIR: " + currentUser;
-        if(u.toLowerCase()==='admin' && p==='shaka123') document.getElementById('adm-nav').style.display='flex';
-        document.getElementById('loginPage').style.display='none';
+    // LOGIKA LOGIN BARU
+    window.loginAsKasir = () => {
+        currentUser = "PUSPA";
+        document.getElementById('activeUser').innerText = "KASIR: " + currentUser;
+        document.getElementById('adm-nav').style.display = 'none';
+        document.getElementById('loginPage').style.display = 'none';
+    };
+
+    window.showAdminLogin = () => {
+        document.getElementById('loginOptions').style.display = 'none';
+        document.getElementById('adminLoginForm').style.display = 'block';
+    };
+
+    window.backToOptions = () => {
+        document.getElementById('loginOptions').style.display = 'block';
+        document.getElementById('adminLoginForm').style.display = 'none';
+    };
+
+    window.doAdminLogin = () => {
+        const p = document.getElementById('pass').value;
+        if(p === 'shaka123') {
+            currentUser = "ADMIN";
+            document.getElementById('activeUser').innerText = "MODE: " + currentUser;
+            document.getElementById('adm-nav').style.display = 'flex';
+            document.getElementById('loginPage').style.display = 'none';
+        } else {
+            alert("Password Admin Salah!");
+        }
     };
 
     window.tab = (id, el) => {
@@ -283,7 +313,6 @@
         closeModal();
     };
 
-    // FUNGSI STRUK FIXED 30 CHAR UNTUK 384 DOTS
     function formatLine(l, r) { 
         const w = 30; 
         let spaceNeeded = w - l.length - r.length;
@@ -293,7 +322,7 @@
 
     function sendToRawBT(t) {
         if(!t) return;
-        let p = "       SHAKA COFFEE\n    --- STRUK KASIR ---\n\n";
+        let p = "        SHAKA COFFEE\n    --- STRUK KASIR ---\n\n";
         p += "Tgl: " + new Date(t.tgl).toLocaleString('id-ID', {dateStyle:'short', timeStyle:'short'}) + "\n";
         p += "Kasir: " + t.kasir + "\n";
         p += "Pel: " + t.nama + "\n";

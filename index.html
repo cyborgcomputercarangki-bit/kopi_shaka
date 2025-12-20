@@ -27,7 +27,6 @@
         .trx-card { background: var(--card); border: 1px solid #222; border-radius: 20px; padding: 18px; margin-bottom: 12px; transition: all 0.3s ease; position: relative; overflow: hidden; }
         .img-container { width: 100%; height: 110px; background: #111; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-        .trx-card:active .img-container img { transform: scale(1.1); }
 
         .menu-name { color: #ffffff; font-weight: 800; font-size: 0.85rem; display: block; margin-bottom: 4px; line-height: 1.2; }
         .menu-price { color: var(--primary); font-weight: 600; font-size: 0.8rem; display: block; }
@@ -148,19 +147,36 @@
     <div id="adm-nav" class="nav-item" style="display:none" onclick="tab('admin', this)"><i>⚙️</i><span>ADMIN</span></div>
 </div>
 
-<div id="payModal" class="modal"><div class="modal-content" style="text-align:center"><h2>Bayar</h2><div id="payTotal" style="font-size:2.2rem; font-weight:800; margin-bottom:20px; color:var(--primary)"></div><input type="number" id="payAmount" placeholder="Nominal Tunai" oninput="calcChange()"><div style="display:flex; justify-content:space-between; padding:15px 0"><span>Kembali</span><b id="payChange">Rp 0</b></div><button class="btn-main" onclick="confirmTrx()">KONFIRMASI</button></div></div>
+<div id="payModal" class="modal">
+    <div class="modal-content">
+        <h2 style="text-align:center; color:var(--primary);">Pembayaran</h2>
+        
+        <div id="payCartList" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;"></div>
+        
+        <div id="payTotal" style="font-size:2.2rem; font-weight:800; text-align:center; margin-bottom:20px; color:var(--primary)"></div>
+        <input type="number" id="payAmount" placeholder="Nominal Tunai" oninput="calcChange()">
+        <div style="display:flex; justify-content:space-between; padding:15px 0">
+            <span>Kembali</span>
+            <b id="payChange">Rp 0</b>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px;">
+            <button class="btn-main" onclick="confirmTrx()">KONFIRMASI</button>
+            <button class="btn-main" style="background:var(--error); color:white;" onclick="cancelTrx()">BATAL</button>
+        </div>
+        <button class="btn-main" style="background:none; color:var(--text-dim); font-size:0.75rem; margin-top:10px;" onclick="closeModal()">LANJUT PILIH MENU</button>
+    </div>
+</div>
+
 <div id="successModal" class="modal"><div class="modal-content" style="text-align:center"><div style="font-size:4rem; color:var(--bright-green)">✓</div><h2>Berhasil</h2><button class="btn-main" onclick="printStrukLastTrx()" style="background:#444; color:white; margin-bottom:10px">🖨️ CETAK STRUK</button><button class="btn-main" onclick="resetKasir()">🏠 SELESAI</button></div></div>
 
 <div id="adminModal" class="modal">
     <div class="modal-content">
         <h2 id="adm-title">Input Menu</h2>
         <input type="hidden" id="adm-id">
-        
         <div id="img-preview-container" style="width:100%; height:150px; background:#222; border-radius:18px; margin-bottom:15px; overflow:hidden; display:flex; align-items:center; justify-content:center; border:1px dashed #444;">
             <img id="img-preview" src="" style="display:none; width:100%; height:100%; object-fit:cover;">
             <span id="img-placeholder" style="color:#555; font-size:0.7rem; font-weight:800;">📷 BELUM ADA FOTO</span>
         </div>
-
         <input type="text" id="adm-name" placeholder="Nama Menu">
         <select id="adm-cat">
             <option value="COFFEE">☕ COFFEE</option>
@@ -172,14 +188,32 @@
         </select>
         <input type="number" id="adm-price" placeholder="Harga Jual">
         <input type="number" id="adm-stock" placeholder="Stok">
-        
-        <label for="adm-file" style="display:block; background:#333; color:var(--primary); padding:15px; border-radius:15px; text-align:center; font-size:0.75rem; font-weight:800; cursor:pointer; margin-bottom:12px; border:1px solid var(--primary);">
-            📷 AMBIL FOTO PRODUK
-        </label>
+        <label for="adm-file" style="display:block; background:#333; color:var(--primary); padding:15px; border-radius:15px; text-align:center; font-size:0.75rem; font-weight:800; cursor:pointer; margin-bottom:12px; border:1px solid var(--primary);">📷 AMBIL FOTO PRODUK</label>
         <input type="file" id="adm-file" accept="image/*" style="display:none" onchange="previewImage(this)">
-
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:10px">
             <button class="btn-main" id="btnSaveAdmin" onclick="saveAdminMenu()">SIMPAN</button>
+            <button class="btn-main" style="background:none; border:1px solid #444; color:white" onclick="closeModal()">BATAL</button>
+        </div>
+    </div>
+</div>
+
+<div id="editTrxModal" class="modal">
+    <div class="modal-content">
+        <h2 style="color:var(--primary)">Edit Riwayat</h2>
+        <input type="hidden" id="et-id">
+        <label style="font-size: 0.7rem; color: var(--text-dim);">NAMA PELANGGAN</label>
+        <input type="text" id="et-nama">
+        <label style="font-size: 0.7rem; color: var(--text-dim);">LOKASI</label>
+        <select id="et-lokasi">
+            <option value="Lantai 1">Lantai 1</option>
+            <option value="Lantai 2">Lantai 2</option>
+        </select>
+        <label style="font-size: 0.7rem; color: var(--text-dim);">TOTAL HARGA (Rp)</label>
+        <input type="number" id="et-total">
+        <label style="font-size: 0.7rem; color: var(--text-dim);">TUNAI/BAYAR (Rp)</label>
+        <input type="number" id="et-bayar">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:20px">
+            <button class="btn-main" onclick="saveEditTrx()">UPDATE</button>
             <button class="btn-main" style="background:none; border:1px solid #444; color:white" onclick="closeModal()">BATAL</button>
         </div>
     </div>
@@ -194,7 +228,6 @@
     
     let menus = [], cart = [], allTrx = [], currentFilterMode = 'all', lastTrxData = null, selectedCat = 'ALL', currentUser = '', currentFloor = 'Lantai 1', base64String = "";
 
-    // LOGIN LOGIC
     window.loginAsKasir = () => {
         currentUser = "PUSPA";
         document.getElementById('activeUser').innerText = "KASIR: " + currentUser;
@@ -219,9 +252,7 @@
             document.getElementById('activeUser').innerText = "MODE: " + currentUser;
             document.getElementById('adm-nav').style.display = 'flex';
             document.getElementById('loginPage').style.display = 'none';
-        } else {
-            alert("Password Admin Salah!");
-        }
+        } else { alert("Password Admin Salah!"); }
     };
 
     window.tab = (id, el) => {
@@ -231,7 +262,6 @@
         if(id==='history' || id==='rekap') loadTrxData();
     };
 
-    // REALTIME DATABASE
     onSnapshot(collection(db, "menus"), (snap) => {
         menus = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => a.name.localeCompare(b.name));
         renderMenuGrid(); renderAdmin();
@@ -246,11 +276,9 @@
         renderMenuGrid(); 
     };
 
-    // RENDER MENU DENGAN GAMBAR
     function renderMenuGrid() {
         const s = document.getElementById('menuSearch').value.toLowerCase();
         const f = menus.filter(m => (selectedCat === 'ALL' || m.category === selectedCat) && m.name.toLowerCase().includes(s));
-        
         document.getElementById('menuGrid').innerHTML = f.map(m => `
             <div class="trx-card" style="padding:0; ${m.stock <= 0 ? 'opacity:0.3; pointer-events:none' : ''}" onclick="addToCart('${m.id}')">
                 <div class="img-container">
@@ -264,83 +292,7 @@
             </div>`).join('');
     }
 
-    // IMAGE PROCESSING (BASE64 + COMPRESSION)
-    window.previewImage = (input) => {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 400; 
-                    const scaleSize = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scaleSize;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    base64String = canvas.toDataURL('image/jpeg', 0.7);
-                    
-                    document.getElementById('img-preview').src = base64String;
-                    document.getElementById('img-preview').style.display = 'block';
-                    document.getElementById('img-placeholder').style.display = 'none';
-                };
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    };
-
-    window.saveAdminMenu = async () => {
-        const btn = document.getElementById('btnSaveAdmin');
-        const id = document.getElementById('adm-id').value;
-        const name = document.getElementById('adm-name').value;
-        if(!name) return alert("Nama menu wajib!");
-
-        btn.innerText = "PROSES...";
-        btn.disabled = true;
-
-        const d = { 
-            name: name, 
-            category: document.getElementById('adm-cat').value, 
-            price: parseInt(document.getElementById('adm-price').value) || 0, 
-            stock: parseInt(document.getElementById('adm-stock').value) || 0,
-            image: base64String 
-        };
-
-        try {
-            id ? await updateDoc(doc(db,"menus",id), d) : await addDoc(collection(db,"menus"), d);
-            closeModal();
-            base64String = "";
-        } catch(e) { alert("Error: " + e.message); }
-        btn.innerText = "SIMPAN";
-        btn.disabled = false;
-    };
-
-    window.editMenu = (id) => {
-        const m = menus.find(x => x.id === id);
-        document.getElementById('adm-id').value = m.id;
-        document.getElementById('adm-name').value = m.name;
-        document.getElementById('adm-cat').value = m.category;
-        document.getElementById('adm-price').value = m.price;
-        document.getElementById('adm-stock').value = m.stock;
-        
-        const preview = document.getElementById('img-preview');
-        const placeholder = document.getElementById('img-placeholder');
-        if(m.image) {
-            base64String = m.image;
-            preview.src = m.image;
-            preview.style.display = 'block';
-            placeholder.style.display = 'none';
-        } else {
-            base64String = "";
-            preview.style.display = 'none';
-            placeholder.style.display = 'block';
-        }
-        document.getElementById('adm-title').innerText = "Edit Menu";
-        document.getElementById('adminModal').style.display = 'flex';
-    };
-
-    // KASIR FUNCTIONS
+    // KASIR & CART FUNCTIONS
     window.addToCart = (id) => {
         const m = menus.find(x => x.id === id); const ex = cart.find(x => x.id === id);
         if(ex) { if(ex.qty < m.stock) ex.qty++; else return showNotif("Stok Habis!"); } else { cart.push({...m, qty: 1}); }
@@ -356,11 +308,52 @@
         document.getElementById('totalPrice').innerText = 'Rp ' + tot.toLocaleString();
     }
 
-    window.updateQty = (id, delta) => { const i = cart.find(x => x.id === id); i.qty += delta; if(i.qty <= 0) cart = cart.filter(x => x.id !== id); updateCart(); };
+    window.updateQty = (id, delta) => { 
+        const i = cart.find(x => x.id === id); 
+        i.qty += delta; 
+        if(i.qty <= 0) cart = cart.filter(x => x.id !== id); 
+        updateCart(); 
+    };
 
-    // TRANSAKSI & STRUK
+    // FITUR BARU: MODAL EDIT & BATAL
+    window.updatePayCart = () => {
+        let tot = 0;
+        document.getElementById('payCartList').innerHTML = cart.map(i => {
+            tot += (i.price * i.qty);
+            return `<div class="cart-item" style="padding:10px 0"><div style="flex:1"><b style="color:white; font-size:0.75rem">${i.name}</b><br><small style="color:var(--primary)">Rp ${(i.price*i.qty).toLocaleString()}</small></div><div class="qty-control" style="scale:0.8"><button class="qty-btn" onclick="updateQtyInPay('${i.id}',-1)">-</button><b style="min-width:20px; text-align:center; color:white">${i.qty}</b><button class="qty-btn" onclick="updateQtyInPay('${i.id}',1)">+</button></div></div>`;
+        }).join('');
+        document.getElementById('payTotal').innerText = 'Rp ' + tot.toLocaleString();
+        if(cart.length === 0) closeModal();
+        calcChange();
+    };
+
+    window.updateQtyInPay = (id, delta) => {
+        window.updateQty(id, delta);
+        window.updatePayCart();
+    };
+
+    window.cancelTrx = () => {
+        if(confirm("Batalkan semua pesanan?")) {
+            cart = [];
+            updateCart();
+            closeModal();
+            document.getElementById('cName').value = '';
+            showNotif("Transaksi Dibatalkan");
+        }
+    };
+
+    window.openPayment = () => { 
+        if(cart.length) { 
+            window.updatePayCart();
+            document.getElementById('payAmount').value = '';
+            document.getElementById('payChange').innerText = 'Rp 0';
+            document.getElementById('payModal').style.display = 'flex'; 
+        } 
+    };
+
     window.confirmTrx = async () => {
-        const tot = cart.reduce((a,b)=>a+(b.price*b.qty),0); const pay = parseInt(document.getElementById('payAmount').value) || 0;
+        const tot = cart.reduce((a,b)=>a+(b.price*b.qty),0); 
+        const pay = parseInt(document.getElementById('payAmount').value) || 0;
         if(pay < tot) return alert("Uang Kurang!");
         const d = { tgl: new Date().toISOString(), nama: document.getElementById('cName').value || 'Guest', lokasi: currentFloor, kasir: currentUser, itemDetails: cart.map(i => ({name: i.name, qty: i.qty, price: i.price})), total: tot, bayar: pay, kembali: pay - tot };
         lastTrxData = d; const b = writeBatch(db);
@@ -369,27 +362,40 @@
         await b.commit(); document.getElementById('payModal').style.display='none'; document.getElementById('successModal').style.display='flex';
     };
 
-    // HISTORY & REKAP
+    // HISTORY & ADMIN FUNCTIONS
     async function loadTrxData() {
         const s = await getDocs(query(collection(db, "transactions"), orderBy("tgl", "desc")));
         allTrx = s.docs.map(d => ({id: d.id, ...d.data()}));
-        document.getElementById('hList').innerHTML = allTrx.map(t => {
-            const itemsText = t.itemDetails ? t.itemDetails.map(it => `${it.name} (x${it.qty})`).join(', ') : '';
-            return `<div class="trx-card" style="display:flex; justify-content:space-between; align-items:center">
-                <div style="flex:1">
-                    <small>${new Date(t.tgl).toLocaleString()}</small><br>
-                    <div style="display:flex; align-items:baseline; gap:8px">
-                        <b style="font-size:1rem">${t.nama}</b>
-                        <span style="font-size:0.65rem; color:var(--primary); font-weight:800; background:rgba(212,163,115,0.1); padding:2px 8px; border-radius:6px; border:1px solid rgba(212,163,115,0.2)">${t.lokasi || 'Lantai 1'}</span>
-                    </div>
-                    <small style="color:var(--text-dim)">${itemsText}</small><br>
-                    <b style="color:var(--bright-green)">Rp ${t.total.toLocaleString()}</b>
-                </div>
-                <button onclick="reprintStruk('${t.id}')" style="background:#333; border:none; padding:12px; border-radius:12px">🖨️</button>
-            </div>`;
-        }).join('');
+        renderHistory();
         runFilter();
     }
+
+    function renderHistory() {
+        document.getElementById('hList').innerHTML = allTrx.map(t => {
+            const itemsText = t.itemDetails ? t.itemDetails.map(it => `${it.name} (x${it.qty})`).join(', ') : '';
+            return `<div class="trx-card" style="display:flex; justify-content:space-between; align-items:center"><div style="flex:1"><small>${new Date(t.tgl).toLocaleString()}</small><br><div style="display:flex; align-items:baseline; gap:8px"><b style="font-size:1rem">${t.nama}</b><span style="font-size:0.65rem; color:var(--primary); font-weight:800; background:rgba(212,163,115,0.1); padding:2px 8px; border-radius:6px; border:1px solid rgba(212,163,115,0.2)">${t.lokasi || 'Lantai 1'}</span></div><small style="color:var(--text-dim)">${itemsText}</small><br><b style="color:var(--bright-green)">Rp ${t.total.toLocaleString()}</b></div><div style="display:flex; gap:5px"><button onclick="reprintStruk('${t.id}')" style="background:#333; border:none; padding:10px; border-radius:10px">🖨️</button>${currentUser === 'ADMIN' ? `<button onclick="editTrxPrompt('${t.id}')" style="background:var(--primary); border:none; padding:10px; border-radius:10px">✏️</button><button onclick="deleteTrx('${t.id}')" style="background:var(--error); border:none; padding:10px; border-radius:10px">🗑️</button>` : ''}</div></div>`;
+        }).join('');
+    }
+
+    window.deleteTrx = async (id) => { if(confirm("Hapus history ini?")) { await deleteDoc(doc(db, "transactions", id)); loadTrxData(); showNotif("Riwayat dihapus"); } };
+
+    window.editTrxPrompt = (id) => {
+        const t = allTrx.find(x => x.id === id);
+        document.getElementById('et-id').value = t.id;
+        document.getElementById('et-nama').value = t.nama;
+        document.getElementById('et-lokasi').value = t.lokasi || 'Lantai 1';
+        document.getElementById('et-total').value = t.total;
+        document.getElementById('et-bayar').value = t.bayar;
+        document.getElementById('editTrxModal').style.display = 'flex';
+    };
+
+    window.saveEditTrx = async () => {
+        const id = document.getElementById('et-id').value;
+        const nTotal = parseInt(document.getElementById('et-total').value);
+        const nBayar = parseInt(document.getElementById('et-bayar').value);
+        await updateDoc(doc(db, "transactions", id), { nama: document.getElementById('et-nama').value, lokasi: document.getElementById('et-lokasi').value, total: nTotal, bayar: nBayar, kembali: nBayar - nTotal });
+        closeModal(); loadTrxData(); showNotif("Data diperbarui");
+    };
 
     window.runFilter = (v) => {
         let f = allTrx;
@@ -405,47 +411,61 @@
     };
 
     window.setFilterMode = (m, el) => {
-        currentFilterMode = m;
-        document.querySelectorAll('#p-rekap .filter-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        const p = document.getElementById('selDay');
-        if(m !== 'all') { p.type = (m==='hari'?'date':'month'); p.showPicker(); } else { runFilter(); }
+        currentFilterMode = m; document.querySelectorAll('#p-rekap .filter-btn').forEach(b => b.classList.remove('active')); el.classList.add('active');
+        const p = document.getElementById('selDay'); if(m !== 'all') { p.type = (m==='hari'?'date':'month'); p.showPicker(); } else { runFilter(); }
+    };
+
+    // INVENTORY MANAGEMENT
+    window.renderAdmin = () => {
+        document.getElementById('adminList').innerHTML = menus.map(m => `
+            <div class="trx-card" style="display:flex; justify-content:space-between; align-items:center"><div style="display:flex; align-items:center; gap:10px"><div style="width:40px; height:40px; border-radius:8px; overflow:hidden; background:#222">${m.image ? `<img src="${m.image}" style="width:100%; height:100%; object-fit:cover">` : ''}</div><div><b>${m.name}</b><br><small>Rp ${m.price.toLocaleString()} | Stok: ${m.stock}</small></div></div><div style="display:flex; gap:8px"><button onclick="editMenu('${m.id}')" style="background:var(--primary); border:none; padding:10px; border-radius:10px">✏️</button><button onclick="deleteMenu('${m.id}')" style="background:var(--error); border:none; padding:10px; border-radius:10px">🗑️</button></div></div>`).join('');
+    };
+
+    window.previewImage = (input) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image(); img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 400; const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    base64String = canvas.toDataURL('image/jpeg', 0.7);
+                    document.getElementById('img-preview').src = base64String; document.getElementById('img-preview').style.display = 'block'; document.getElementById('img-placeholder').style.display = 'none';
+                };
+            }; reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    window.saveAdminMenu = async () => {
+        const btn = document.getElementById('btnSaveAdmin'); const id = document.getElementById('adm-id').value; const name = document.getElementById('adm-name').value;
+        if(!name) return alert("Nama menu wajib!");
+        btn.innerText = "PROSES..."; btn.disabled = true;
+        const d = { name: name, category: document.getElementById('adm-cat').value, price: parseInt(document.getElementById('adm-price').value) || 0, stock: parseInt(document.getElementById('adm-stock').value) || 0, image: base64String };
+        try { id ? await updateDoc(doc(db,"menus",id), d) : await addDoc(collection(db,"menus"), d); closeModal(); base64String = ""; } catch(e) { alert("Error: " + e.message); }
+        btn.innerText = "SIMPAN"; btn.disabled = false;
+    };
+
+    window.editMenu = (id) => {
+        const m = menus.find(x => x.id === id);
+        document.getElementById('adm-id').value = m.id; document.getElementById('adm-name').value = m.name; document.getElementById('adm-cat').value = m.category;
+        document.getElementById('adm-price').value = m.price; document.getElementById('adm-stock').value = m.stock;
+        const preview = document.getElementById('img-preview'); const placeholder = document.getElementById('img-placeholder');
+        if(m.image) { base64String = m.image; preview.src = m.image; preview.style.display = 'block'; placeholder.style.display = 'none'; }
+        else { base64String = ""; preview.style.display = 'none'; placeholder.style.display = 'block'; }
+        document.getElementById('adm-title').innerText = "Edit Menu"; document.getElementById('adminModal').style.display = 'flex';
     };
 
     // UTILITIES
-    window.renderAdmin = () => {
-        document.getElementById('adminList').innerHTML = menus.map(m => `
-            <div class="trx-card" style="display:flex; justify-content:space-between; align-items:center">
-                <div style="display:flex; align-items:center; gap:10px">
-                    <div style="width:40px; height:40px; border-radius:8px; overflow:hidden; background:#222">
-                        ${m.image ? `<img src="${m.image}" style="width:100%; height:100%; object-fit:cover">` : ''}
-                    </div>
-                    <div><b>${m.name}</b><br><small>Rp ${m.price.toLocaleString()} | Stok: ${m.stock}</small></div>
-                </div>
-                <div style="display:flex; gap:8px">
-                    <button onclick="editMenu('${m.id}')" style="background:var(--primary); border:none; padding:10px; border-radius:10px">✏️</button>
-                    <button onclick="deleteMenu('${m.id}')" style="background:var(--error); border:none; padding:10px; border-radius:10px">🗑️</button>
-                </div>
-            </div>`).join('');
-    };
-
-    window.openAddMenu = () => { 
-        document.getElementById('adm-id').value=''; 
-        document.getElementById('img-preview').style.display='none';
-        document.getElementById('img-placeholder').style.display='block';
-        base64String = "";
-        document.getElementById('adm-title').innerText="Tambah Menu"; 
-        document.getElementById('adminModal').style.display='flex'; 
-    };
-
     window.closeModal = () => document.querySelectorAll('.modal').forEach(m => m.style.display='none');
+    window.openAddMenu = () => { document.getElementById('adm-id').value=''; document.getElementById('img-preview').style.display='none'; document.getElementById('img-placeholder').style.display='block'; base64String = ""; document.getElementById('adm-title').innerText="Tambah Menu"; document.getElementById('adminModal').style.display='flex'; };
     window.deleteMenu = async (id) => { if(confirm("Hapus?")) await deleteDoc(doc(db, "menus", id)); };
     window.showNotif = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500); };
     window.resetKasir = () => { cart=[]; updateCart(); document.getElementById('cName').value=''; document.getElementById('successModal').style.display='none'; tab('kasir', document.querySelectorAll('.nav-item')[0]); };
-    window.openPayment = () => { if(cart.length) { document.getElementById('payTotal').innerText = document.getElementById('totalPrice').innerText; document.getElementById('payModal').style.display='flex'; } };
     window.calcChange = () => { const t = cart.reduce((a,b)=>a+(b.price*b.qty),0); const p = parseInt(document.getElementById('payAmount').value) || 0; document.getElementById('payChange').innerText = 'Rp ' + (p-t).toLocaleString(); };
-    
-    // STRUK RAWBT
+    document.getElementById('menuSearch').addEventListener('input', renderMenuGrid);
+
+    // STRUK PRINTER
     function formatLine(l, r) { const w = 30; let s = w - l.length - r.length; return l + " ".repeat(s < 1 ? 1 : s) + r; }
     function sendToRawBT(t) {
         if(!t) return;
@@ -453,17 +473,18 @@
         p += "Tgl: " + new Date(t.tgl).toLocaleString('id-ID') + "\n";
         p += "Kasir: " + t.kasir + "\nPel: " + t.nama + "\nLok: " + t.lokasi + "\n";
         p += "------------------------------\n";
-        t.itemDetails.forEach(i => { p += i.name.toUpperCase() + "\n" + formatLine(i.qty + "x " + i.price.toLocaleString(), (i.price*i.qty).toLocaleString()) + "\n"; });
+        t.itemDetails.forEach(it => { p += it.name.toUpperCase() + "\n"; p += formatLine(it.qty + " x " + it.price.toLocaleString(), (it.qty * it.price).toLocaleString()) + "\n"; });
         p += "------------------------------\n";
         p += formatLine("TOTAL", "Rp " + t.total.toLocaleString()) + "\n";
-        p += formatLine("Tunai", t.bayar.toLocaleString()) + "\n";
-        p += formatLine("Kembali", t.kembali.toLocaleString()) + "\n\n";
-        p += "      Terima Kasih!\n\n\n\n";
-        window.location.href = "rawbt:" + p;
+        p += formatLine("TUNAI", "Rp " + t.bayar.toLocaleString()) + "\n";
+        p += formatLine("KEMBALI", "Rp " + t.kembali.toLocaleString()) + "\n\n";
+        p += "     TERIMA KASIH      \n\n\n";
+        const link = "rawbt:base64," + btoa(unescape(encodeURIComponent(p)));
+        window.location.href = link;
     }
-    window.printStrukLastTrx = () => sendToRawBT(lastTrxData);
-    window.reprintStruk = (id) => sendToRawBT(allTrx.find(x => x.id === id));
-    document.getElementById('menuSearch').oninput = () => renderMenuGrid();
+    window.printStrukLastTrx = () => { if(lastTrxData) sendToRawBT(lastTrxData); };
+    window.reprintStruk = (id) => { const t = allTrx.find(x => x.id === id); if(t) sendToRawBT(t); };
+
 </script>
 </body>
 </html>

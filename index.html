@@ -89,8 +89,7 @@
         .admin-only { display: none; }
         .stock-tag { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 10px; font-size: 0.6rem; color: var(--gold); font-weight: 800; }
         
-        .report-item { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 20px; border-radius: 18px; margin-bottom: 8px; border: 1px solid rgba(212,163,115,0.1); }
-        .report-dots { flex: 1; border-bottom: 2px dotted rgba(212,163,115,0.2); margin: 0 15px; position: relative; top: -4px; }
+        .report-item { display: flex; flex-direction: column; background: var(--card); padding: 15px 20px; border-radius: 18px; margin-bottom: 12px; border: 1px solid rgba(212,163,115,0.1); }
         .report-qty { color: var(--gold); font-weight: 800; font-size: 1.1rem; }
 
         .btn-kas-keluar-besar {
@@ -324,7 +323,7 @@
             renderMenu();
             renderAdminInventory();
             if(document.getElementById('p-history').classList.contains('active')) renderHistory(lastHistoryData);
-            if(document.getElementById('p-rekap').classList.contains('active')) fetchData(); // Refresh Neraca agar ikon hapus muncul
+            if(document.getElementById('p-rekap').classList.contains('active')) fetchData();
         } else { alert("Password Salah!"); }
     };
     function logout() { currentUser = "KASIR"; location.reload(); }
@@ -405,22 +404,54 @@
 
     window.renderLaporan = (trxs) => {
         const productMap = {};
+        let totalOmzet = 0;
+        
         trxs.forEach(t => {
             if(t.items && Array.isArray(t.items)) {
                 t.items.forEach(item => {
-                    if(productMap[item.n]) productMap[item.n] += item.q;
-                    else productMap[item.n] = item.q;
+                    if(productMap[item.n]) {
+                        productMap[item.n].qty += item.q;
+                        productMap[item.n].totalHarga += (item.p * item.q);
+                    } else {
+                        productMap[item.n] = {
+                            qty: item.q,
+                            hargaSatuan: item.p,
+                            totalHarga: item.p * item.q
+                        };
+                    }
+                    totalOmzet += (item.p * item.q);
                 });
             }
         });
+
         const sortedProducts = Object.keys(productMap).sort();
-        document.getElementById('laporanList').innerHTML = sortedProducts.map(name => `
-            <div class="report-item">
-                <span style="font-weight:600; font-size:0.9rem;">${name}</span>
-                <div class="report-dots"></div>
-                <span class="report-qty">${productMap[name]}</span>
-            </div>
-        `).join('') || '<div style="text-align:center; padding:50px; opacity:0.3;">Tidak ada data penjualan hari ini.</div>';
+        let htmlLaporan = sortedProducts.map(name => {
+            const data = productMap[name];
+            return `
+                <div class="report-item">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <span style="font-weight:800; font-size:1rem; color: var(--gold);">${name}</span>
+                        <span class="report-qty">x ${data.qty}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; opacity: 0.7;">
+                        <span>Harga: Rp ${data.hargaSatuan.toLocaleString()}</span>
+                        <span style="font-weight: 800; color: var(--text);">Subtotal: Rp ${data.totalHarga.toLocaleString()}</span>
+                    </div>
+                    <div style="border-bottom: 1px dashed rgba(212,163,115,0.2); margin-top: 10px;"></div>
+                </div>
+            `;
+        }).join('');
+
+        if(htmlLaporan) {
+            htmlLaporan += `
+                <div style="background: linear-gradient(135deg, var(--gold), #b8860b); color: #000; padding: 20px; border-radius: 25px; margin-top: 20px; text-align: center;">
+                    <small style="font-weight: 800; letter-spacing: 1px;">TOTAL OMZET PRODUK</small>
+                    <h2 style="margin: 5px 0 0 0; font-weight: 800;">Rp ${totalOmzet.toLocaleString()}</h2>
+                </div>
+            `;
+        }
+
+        document.getElementById('laporanList').innerHTML = htmlLaporan || '<div style="text-align:center; padding:50px; opacity:0.3;">Tidak ada data penjualan hari ini.</div>';
     };
 
     window.renderHistory = (data) => {
@@ -471,7 +502,6 @@
         shakaDialog("Berhasil", "Pengeluaran dicatat.", "success");
     };
 
-    // FUNGSI NERACA DENGAN FITUR HAPUS ADMIN
     window.renderRekap = (trxs, exps) => {
         const incomeTunai = trxs.filter(t => t.metode === 'TUNAI').reduce((a, b) => a + b.total, 0);
         const incomeQris = trxs.filter(t => t.metode === 'QRIS').reduce((a, b) => a + b.total, 0);
@@ -499,16 +529,6 @@
                     <i class="fa-solid fa-circle-minus"></i>
                     <span>KAS KELUAR</span>
                 </button>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:5px; font-size:0.7rem;">
-                    <div style="text-align:left; background:rgba(130,201,30,0.05); padding:10px; border-radius:15px;">
-                        <span style="opacity:0.6;">TOTAL MASUK:</span><br>
-                        <b style="color:var(--bright-green);">+ Rp ${(incomeTunai+incomeQris).toLocaleString()}</b>
-                    </div>
-                    <div style="text-align:left; background:rgba(255,61,0,0.05); padding:10px; border-radius:15px;">
-                        <span style="opacity:0.6;">TOTAL KELUAR:</span><br>
-                        <b style="color:var(--error);">- Rp ${(expOffline+expOnline).toLocaleString()}</b>
-                    </div>
-                </div>
             </div>`;
 
         document.getElementById('expenseList').innerHTML = `<h4 style="color:var(--gold); font-size:0.85rem; margin:20px 0 10px 0; font-weight:800;"><i class="fa-solid fa-list-check"></i> DETAIL PENGELUARAN</h4>` + 
@@ -518,17 +538,16 @@
                         <b>${e.keterangan.toUpperCase()}</b><br>
                         <small style="opacity:0.6; font-size:0.75rem;">
                             <i class="fa-solid ${e.kategori === 'BOSS' ? 'fa-crown' : 'fa-cart-shopping'}" style="color:var(--gold);"></i> 
-                            ${e.kategori} • ${e.metode} • ${new Date(e.tgl).toLocaleTimeString()}
+                            ${e.kategori} • ${e.metode}
                         </small>
                     </div>
                     <div style="display:flex; align-items:center; gap:12px;">
                         <b style="color:var(--error);"> - Rp ${e.nominal.toLocaleString()}</b>
-                        ${currentUser === "ADMIN" ? `<button onclick="confirmDelExp('${e.id}')" style="background:none; border:none; color:var(--error); padding:5px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+                        ${currentUser === "ADMIN" ? `<button onclick="confirmDelExp('${e.id}')" style="background:none; border:none; color:var(--error); padding:5px;"><i class="fa-solid fa-trash-can"></i></button>` : ''}
                     </div>
                 </div>`).join('');
     };
 
-    // FITUR HAPUS KHUSUS ADMIN
     window.confirmDelExp = (id) => {
         if(currentUser !== "ADMIN") return;
         shakaDialog("Hapus Data?", "Hapus riwayat pengeluaran ini?", "error", async () => {
@@ -614,6 +633,7 @@
             const batch = writeBatch(db);
             cart.forEach(i => batch.update(doc(db, "menus", i.id), { stock: (i.stock || 0) - i.qty }));
             await batch.commit();
+            
             let printText = "        SHAKA POS\n";
             printText += "--------------------------------\n";
             printText += `Tgl: ${new Date().toLocaleString('id-ID')}\n`;
@@ -634,8 +654,10 @@
             printText += "--------------------------------\n";
             printText += "    Terima Kasih Atas\n";
             printText += "      Kunjungannya\n\n\n\n";
+            
             const rawbtUrl = "rawbt:base64," + btoa(unescape(encodeURIComponent(printText)));
             window.location.href = rawbtUrl;
+            
             cart = []; updateUI(); closeModal(); document.getElementById('cName').value = '';
             shakaDialog("Sukses", "Transaksi Berhasil!", "success");
         } catch (e) { shakaDialog("Gagal", "Gagal menyimpan transaksi.", "error"); }

@@ -60,7 +60,7 @@
         .taskbar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(13, 27, 42, 0.95); backdrop-filter: blur(25px); height: 90px; border-radius: 30px; display: flex; border: 1px solid rgba(212, 163, 115, 0.25); z-index: 1000; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; text-decoration: none; }
         .nav-item.active { color: var(--gold); }
-        .nav-item span { font-size: 0.65rem; font-weight: 800; margin-top: 8px; letter-spacing: 0.5px; }
+        .nav-item span { font-size: 0.6rem; font-weight: 800; margin-top: 8px; letter-spacing: 0.5px; text-align: center; line-height: 1; }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(15px); }
         .modal-content { background: linear-gradient(to bottom, #0d1b2a, #050a0f); padding: 30px; border-radius: 40px 40px 0 0; width: 100%; max-width: 500px; border-top: 3px solid var(--gold); max-height: 92vh; overflow-y: auto; }
@@ -76,6 +76,11 @@
         .admin-only { display: none; }
         .stock-tag { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 10px; font-size: 0.6rem; color: var(--gold); font-weight: 800; }
         
+        /* Gaya Baris Laporan */
+        .report-item { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px 20px; border-radius: 18px; margin-bottom: 8px; border: 1px solid rgba(212,163,115,0.1); }
+        .report-dots { flex: 1; border-bottom: 2px dotted rgba(212,163,115,0.2); margin: 0 15px; position: relative; top: -4px; }
+        .report-qty { color: var(--gold); font-weight: 800; font-size: 1.1rem; }
+
         .btn-kas-keluar-besar {
             background: linear-gradient(135deg, #ff3d00, #8b0000); color: white; border: 1px solid rgba(255,255,255,0.15); 
             padding: 25px; border-radius: 30px; font-size: 1.1rem; font-weight: 800; cursor: pointer; display: flex; 
@@ -141,6 +146,15 @@
         <div id="hList"></div>
     </div>
 
+    <div id="p-laporan" class="page">
+        <h3 style="color:var(--gold); font-weight: 800;"><i class="fa-solid fa-chart-line"></i> LAPORAN PENJUALAN</h3>
+        <div class="filter-box">
+            <label style="font-size:0.7rem; color:var(--gold); font-weight:800; display:block; margin-bottom:10px;">REKAP PRODUK TERJUAL</label>
+            <input type="date" id="laporanDate" onchange="fetchData()">
+        </div>
+        <div id="laporanList"></div>
+    </div>
+
     <div id="p-rekap" class="page">
         <h3 style="color:var(--gold); font-weight: 800; margin-bottom:20px;"><i class="fa-solid fa-scale-balanced"></i> NERACA</h3>
         <div class="filter-box">
@@ -198,6 +212,7 @@
 <div class="taskbar">
     <div class="nav-item active" onclick="tab('kasir', this)"><i class="fa-solid fa-cash-register fa-xl"></i><span>KASIR</span></div>
     <div class="nav-item" onclick="tab('history', this)"><i class="fa-solid fa-receipt fa-xl"></i><span>RIWAYAT</span></div>
+    <div class="nav-item" onclick="tab('laporan', this)"><i class="fa-solid fa-chart-line fa-xl"></i><span>LAPORAN</span></div>
     <div class="nav-item" onclick="tab('rekap', this)"><i class="fa-solid fa-scale-balanced fa-xl"></i><span>NERACA</span></div>
     <div id="adm-nav" class="nav-item admin-only" onclick="tab('admin', this)"><i class="fa-solid fa-gears fa-xl"></i><span>ADMIN</span></div>
 </div>
@@ -228,6 +243,7 @@
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('historyDate').value = today;
     document.getElementById('rekapDate').value = today;
+    document.getElementById('laporanDate').value = today; // Init tgl laporan
 
     // LOGIN & ACCESS
     window.openLogin = () => { if(currentUser === "ADMIN") logout(); else document.getElementById('loginModal').style.display = 'flex'; };
@@ -301,11 +317,17 @@
         if(unsubTrx) unsubTrx();
         if(unsubExp) unsubExp();
         const activePage = document.querySelector('.page.active').id;
-        const targetDate = activePage === 'p-rekap' ? document.getElementById('rekapDate').value : document.getElementById('historyDate').value;
+        let targetDate = today;
+        
+        if(activePage === 'p-history') targetDate = document.getElementById('historyDate').value;
+        if(activePage === 'p-rekap') targetDate = document.getElementById('rekapDate').value;
+        if(activePage === 'p-laporan') targetDate = document.getElementById('laporanDate').value;
+
         const qTrx = query(collection(db, "transactions"), where("tgl", ">=", targetDate), where("tgl", "<=", targetDate + "\uf8ff"));
         unsubTrx = onSnapshot(qTrx, (s) => {
             lastHistoryData = s.docs.map(d => ({id: d.id, ...d.data()}));
             if(activePage === 'p-history') renderHistory(lastHistoryData);
+            if(activePage === 'p-laporan') renderLaporan(lastHistoryData);
             if(activePage === 'p-rekap') {
                 const qExp = query(collection(db, "expenses"), where("tgl", ">=", targetDate), where("tgl", "<=", targetDate + "\uf8ff"));
                 unsubExp = onSnapshot(qExp, (se) => {
@@ -314,6 +336,34 @@
                 });
             }
         });
+    };
+
+    // LOGIKA LAPORAN AKUMULATIF (ITEM YANG SAMA AKAN DIJUMLAHKAN)
+    window.renderLaporan = (trxs) => {
+        const productMap = {};
+
+        trxs.forEach(t => {
+            if(t.items && Array.isArray(t.items)) {
+                t.items.forEach(item => {
+                    // Gunakan nama item sebagai key untuk akumulasi qty
+                    if(productMap[item.n]) {
+                        productMap[item.n] += item.q;
+                    } else {
+                        productMap[item.n] = item.q;
+                    }
+                });
+            }
+        });
+
+        const sortedProducts = Object.keys(productMap).sort();
+        
+        document.getElementById('laporanList').innerHTML = sortedProducts.map(name => `
+            <div class="report-item">
+                <span style="font-weight:600; font-size:0.9rem;">${name}</span>
+                <div class="report-dots"></div>
+                <span class="report-qty">${productMap[name]}</span>
+            </div>
+        `).join('') || '<div style="text-align:center; padding:50px; opacity:0.3;">Tidak ada data penjualan hari ini.</div>';
     };
 
     window.renderHistory = (data) => {
@@ -393,7 +443,7 @@
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('p-'+id).classList.add('active');
         el.classList.add('active');
-        if(id === 'history' || id === 'rekap') fetchData();
+        if(['history', 'rekap', 'laporan'].includes(id)) fetchData();
     };
 
     window.setFloor = (f, el) => { curFloor = f; document.querySelectorAll('#p-kasir .luxury-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); };
@@ -426,6 +476,9 @@
         const count = cart.reduce((a,b) => a+b.qty, 0);
         document.getElementById('floatingWrapper').style.display = count > 0 ? 'flex' : 'none';
         document.getElementById('cartBadge').innerText = count;
+        if(count === 0) {
+            document.getElementById('cartPreview').innerText = "";
+        }
     }
 
     window.openCheckout = () => {
@@ -433,6 +486,8 @@
         document.getElementById('totalLabel').innerText = "Rp " + tot.toLocaleString();
         document.getElementById('cartItemsList').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(212,163,115,0.1);"><span><b>${i.name}</b><br><small>Rp ${i.price.toLocaleString()} x ${i.qty}</small></span><b>Rp ${(i.price*i.qty).toLocaleString()}</b></div>`).join('');
         document.getElementById('checkoutModal').style.display = 'flex';
+        document.getElementById('cashAmount').value = '';
+        document.getElementById('changeLabel').innerText = "Rp 0";
     };
 
     window.selectPM = (m) => {
@@ -444,14 +499,37 @@
 
     window.processTrx = async () => {
         const tot = cart.reduce((a,b)=>a+(b.price*b.qty),0);
-        const cash = curPM === 'TUNAI' ? (parseInt(document.getElementById('cashAmount').value) || 0) : tot;
-        if(cash < tot) return alert("Uang Kurang!");
-        await addDoc(collection(db, "transactions"), { tgl: new Date().toISOString(), nama: document.getElementById('cName').value || 'Guest', items: cart.map(i => ({n: i.name, p: i.price, q: i.qty})), total: tot, metode: curPM, lokasi: curFloor });
+        const cashValue = document.getElementById('cashAmount').value;
+        const cash = curPM === 'TUNAI' ? (parseInt(cashValue) || 0) : tot;
+        if(curPM === 'TUNAI' && cash < tot) return shakaDialog("Gagal", "Uang Pembayaran Kurang!", "error");
+        
+        await addDoc(collection(db, "transactions"), { 
+            tgl: new Date().toISOString(), 
+            nama: document.getElementById('cName').value || 'Guest', 
+            items: cart.map(i => ({n: i.name, p: i.price, q: i.qty})), 
+            total: tot, 
+            metode: curPM, 
+            lokasi: curFloor 
+        });
+
         const batch = writeBatch(db);
         cart.forEach(i => batch.update(doc(db, "menus", i.id), { stock: (i.stock || 0) - i.qty }));
         await batch.commit();
-        cart = []; updateUI(); closeModal(); document.getElementById('cName').value = '';
+
+        cart = []; 
+        updateUI(); 
+        closeModal(); 
+        document.getElementById('cName').value = '';
         shakaDialog("Sukses", "Transaksi Berhasil!", "success");
+    };
+
+    window.abortTrx = () => {
+        shakaDialog("Konfirmasi", "Batalkan pesanan ini?", "error", () => {
+            cart = [];
+            updateUI();
+            closeModal();
+            shakaDialog("Dibatalkan", "Pesanan telah dihapus.", "success");
+        });
     };
 
     window.renderAdminInventory = () => {
@@ -459,7 +537,13 @@
     };
 
     // UTILS
-    window.shakaDialog = (t, m, tp, c) => { document.getElementById('dialogTitle').innerText = t; document.getElementById('dialogMsg').innerText = m; document.getElementById('dialogIcon').innerHTML = tp === 'success' ? '<i class="fa-solid fa-circle-check" style="color:var(--bright-green)"></i>' : '<i class="fa-solid fa-circle-exclamation" style="color:var(--error)"></i>'; document.getElementById('confirmAction').onclick = () => { if(c) c(); closeDialog(); }; document.getElementById('shakaDialog').style.display = 'flex'; };
+    window.shakaDialog = (t, m, tp, c) => { 
+        document.getElementById('dialogTitle').innerText = t; 
+        document.getElementById('dialogMsg').innerText = m; 
+        document.getElementById('dialogIcon').innerHTML = tp === 'success' ? '<i class="fa-solid fa-circle-check" style="color:var(--bright-green)"></i>' : '<i class="fa-solid fa-circle-exclamation" style="color:var(--error)"></i>'; 
+        document.getElementById('confirmAction').onclick = () => { if(c) c(); closeDialog(); }; 
+        document.getElementById('shakaDialog').style.display = 'flex'; 
+    };
     window.closeDialog = () => document.getElementById('shakaDialog').style.display = 'none';
     window.closeModal = () => { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); };
     window.openExpenseModal = () => { document.getElementById('expenseModal').style.display = 'flex'; };

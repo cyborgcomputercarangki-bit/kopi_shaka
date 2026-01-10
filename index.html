@@ -25,7 +25,7 @@
             background-image: radial-gradient(circle at 50% -20%, #1a2a44 0%, #0a0a0a 80%); 
         }
 
-        /* --- CSS TAMBAHAN UNTUK PRINT STRUK --- */
+        /* --- PRINT AREA TETAP ADA UNTUK CADANGAN --- */
         @media print {
             body * { visibility: hidden; }
             #receipt-print-area, #receipt-print-area * { visibility: visible; }
@@ -512,7 +512,7 @@
         document.getElementById('cashInputArea').style.display = m === 'TUNAI' ? 'block' : 'none';
     };
 
-    // --- MODIFIKASI FUNGSI TRANSAKSI DENGAN LOGIKA PRINT ---
+    // --- FUNGSI TRANSAKSI DENGAN INTEGRASI RAWBT INTENT ---
     window.processTrx = async () => {
         const tot = cart.reduce((a,b)=>a+(b.price*b.qty),0);
         const cashValue = document.getElementById('cashAmount').value;
@@ -537,34 +537,41 @@
             cart.forEach(i => batch.update(doc(db, "menus", i.id), { stock: (i.stock || 0) - i.qty }));
             await batch.commit();
 
-            // 3. Persiapkan Area Print
-            document.getElementById('p-tgl').innerText = new Date().toLocaleString('id-ID');
-            document.getElementById('p-info').innerText = `${customerName.toUpperCase()} | ${curFloor} | ${curPM}`;
-            
-            let printItemsHtml = "";
-            cart.forEach(i => {
-                printItemsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                    <span style="flex:1;">${i.name}</span>
-                    <span style="width:30px; text-align:right;">${i.qty}x</span>
-                    <span style="width:70px; text-align:right;">${(i.price*i.qty).toLocaleString()}</span>
-                </div>`;
-            });
-            document.getElementById('p-items').innerHTML = printItemsHtml;
-            document.getElementById('p-total').innerText = "Rp " + tot.toLocaleString();
-            document.getElementById('p-bayar').innerText = "Rp " + cash.toLocaleString();
-            document.getElementById('p-kembali').innerText = "Rp " + (cash - tot).toLocaleString();
-            document.getElementById('p-bayar-row').style.display = curPM === 'TUNAI' ? 'flex' : 'none';
-            document.getElementById('p-kembali-row').style.display = curPM === 'TUNAI' ? 'flex' : 'none';
+            // 3. PERSIPAN TEKS STRUK UNTUK RAWBT
+            let printText = "        SHAKA POS\n";
+            printText += "--------------------------------\n";
+            printText += `Tgl: ${new Date().toLocaleString('id-ID')}\n`;
+            printText += `Plg: ${customerName.toUpperCase()}\n`;
+            printText += `Lok: ${curFloor} | Met: ${curPM}\n`;
+            printText += "--------------------------------\n";
 
-            // 4. Trigger Print
-            window.print();
+            cart.forEach(i => {
+                let nama = i.name.substring(0, 18);
+                // Format: Nama Item (18 chars) Qty (3 chars) Harga (9 chars)
+                let line = `${nama.padEnd(18)} ${String(i.qty).padStart(2)}x ${ (i.price*i.qty).toLocaleString().padStart(8) }\n`;
+                printText += line;
+            });
+
+            printText += "--------------------------------\n";
+            printText += `TOTAL:   Rp ${tot.toLocaleString().padStart(15)}\n`;
+            if (curPM === 'TUNAI') {
+                printText += `BAYAR:   Rp ${parseInt(cash).toLocaleString().padStart(15)}\n`;
+                printText += `KEMBALI: Rp ${(cash - tot).toLocaleString().padStart(15)}\n`;
+            }
+            printText += "--------------------------------\n";
+            printText += "    Terima Kasih Atas\n";
+            printText += "      Kunjungannya\n\n\n\n";
+
+            // 4. KIRIM DATA KE APLIKASI RAWBT MELALUI PROTOKOL INTENT
+            const rawbtUrl = "rawbt:base64," + btoa(unescape(encodeURIComponent(printText)));
+            window.location.href = rawbtUrl;
 
             // 5. Reset UI
             cart = []; 
             updateUI(); 
             closeModal(); 
             document.getElementById('cName').value = '';
-            shakaDialog("Sukses", "Transaksi Berhasil & Struk Dicetak!", "success");
+            shakaDialog("Sukses", "Transaksi Berhasil & Struk Terkirim!", "success");
 
         } catch (e) {
             shakaDialog("Gagal", "Gagal menyimpan transaksi.", "error");

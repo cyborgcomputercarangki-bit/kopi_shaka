@@ -324,6 +324,7 @@
             renderMenu();
             renderAdminInventory();
             if(document.getElementById('p-history').classList.contains('active')) renderHistory(lastHistoryData);
+            if(document.getElementById('p-rekap').classList.contains('active')) fetchData(); // Refresh Neraca agar ikon hapus muncul
         } else { alert("Password Salah!"); }
     };
     function logout() { currentUser = "KASIR"; location.reload(); }
@@ -460,7 +461,7 @@
             tgl: new Date().toISOString(), 
             keterangan: note, 
             kategori: curExpCat, 
-            metode: curExpMethod, // OFFLINE or ONLINE
+            metode: curExpMethod, 
             nominal: amt 
         });
         
@@ -470,16 +471,12 @@
         shakaDialog("Berhasil", "Pengeluaran dicatat.", "success");
     };
 
+    // FUNGSI NERACA DENGAN FITUR HAPUS ADMIN
     window.renderRekap = (trxs, exps) => {
-        // INCOME
         const incomeTunai = trxs.filter(t => t.metode === 'TUNAI').reduce((a, b) => a + b.total, 0);
         const incomeQris = trxs.filter(t => t.metode === 'QRIS').reduce((a, b) => a + b.total, 0);
-        
-        // EXPENSES
         const expOffline = exps.filter(e => e.metode === 'OFFLINE').reduce((a, b) => a + b.nominal, 0);
         const expOnline = exps.filter(e => e.metode === 'ONLINE').reduce((a, b) => a + b.nominal, 0);
-
-        // KAS CALCULATION
         const kasKasir = incomeTunai - expOffline;
         const kasBank = incomeQris - expOnline;
         const netProfit = (incomeTunai + incomeQris) - (expOffline + expOnline);
@@ -488,7 +485,6 @@
             <div class="summary-card">
                 <small style="opacity:0.6; font-weight:800; letter-spacing:2px;"><i class="fa-solid fa-chart-line"></i> TOTAL NET PROFIT</small>
                 <h1 style="color:var(--gold); margin:10px 0; font-size:2rem; font-weight:800;">Rp ${netProfit.toLocaleString()}</h1>
-                
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:15px 0;">
                     <div style="background:rgba(212,163,115,0.1); padding:15px; border-radius:20px; border:1px solid var(--gold);">
                         <small style="font-size:0.6rem; opacity:0.8; display:block; margin-bottom:5px; font-weight:800;">KAS KASIR (OFFLINE)</small>
@@ -499,12 +495,10 @@
                         <b style="color:#00a8ff; font-size:0.95rem;">Rp ${kasBank.toLocaleString()}</b>
                     </div>
                 </div>
-
                 <button class="btn-kas-keluar-besar" onclick="openExpenseModal()">
                     <i class="fa-solid fa-circle-minus"></i>
                     <span>KAS KELUAR</span>
                 </button>
-
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:5px; font-size:0.7rem;">
                     <div style="text-align:left; background:rgba(130,201,30,0.05); padding:10px; border-radius:15px;">
                         <span style="opacity:0.6;">TOTAL MASUK:</span><br>
@@ -518,7 +512,29 @@
             </div>`;
 
         document.getElementById('expenseList').innerHTML = `<h4 style="color:var(--gold); font-size:0.85rem; margin:20px 0 10px 0; font-weight:800;"><i class="fa-solid fa-list-check"></i> DETAIL PENGELUARAN</h4>` + 
-            exps.map(e => `<div class="expense-card"><div><b>${e.keterangan.toUpperCase()}</b><br><small style="opacity:0.6; font-size:0.75rem;"><i class="fa-solid ${e.kategori === 'BOSS' ? 'fa-crown' : 'fa-cart-shopping'}" style="color:var(--gold);"></i> ${e.kategori} • ${e.metode} • ${new Date(e.tgl).toLocaleTimeString()}</small></div><b style="color:var(--error);"> - Rp ${e.nominal.toLocaleString()}</b></div>`).join('');
+            exps.map(e => `
+                <div class="expense-card">
+                    <div>
+                        <b>${e.keterangan.toUpperCase()}</b><br>
+                        <small style="opacity:0.6; font-size:0.75rem;">
+                            <i class="fa-solid ${e.kategori === 'BOSS' ? 'fa-crown' : 'fa-cart-shopping'}" style="color:var(--gold);"></i> 
+                            ${e.kategori} • ${e.metode} • ${new Date(e.tgl).toLocaleTimeString()}
+                        </small>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <b style="color:var(--error);"> - Rp ${e.nominal.toLocaleString()}</b>
+                        ${currentUser === "ADMIN" ? `<button onclick="confirmDelExp('${e.id}')" style="background:none; border:none; color:var(--error); padding:5px; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+                    </div>
+                </div>`).join('');
+    };
+
+    // FITUR HAPUS KHUSUS ADMIN
+    window.confirmDelExp = (id) => {
+        if(currentUser !== "ADMIN") return;
+        shakaDialog("Hapus Data?", "Hapus riwayat pengeluaran ini?", "error", async () => {
+            await deleteDoc(doc(db, "expenses", id));
+            shakaDialog("Berhasil", "Data telah dihapus.", "success");
+        });
     };
 
     window.tab = (id, el) => {
@@ -585,9 +601,7 @@
         const cashValue = document.getElementById('cashAmount').value;
         const cash = curPM === 'TUNAI' ? (parseInt(cashValue.replace(/\./g, '')) || 0) : tot;
         if(curPM === 'TUNAI' && cash < tot) return shakaDialog("Gagal", "Uang Pembayaran Kurang!", "error");
-        
         const customerName = document.getElementById('cName').value || 'Guest';
-        
         try {
             await addDoc(collection(db, "transactions"), { 
                 tgl: new Date().toISOString(), 
@@ -597,24 +611,20 @@
                 metode: curPM, 
                 lokasi: curFloor 
             });
-
             const batch = writeBatch(db);
             cart.forEach(i => batch.update(doc(db, "menus", i.id), { stock: (i.stock || 0) - i.qty }));
             await batch.commit();
-
             let printText = "        SHAKA POS\n";
             printText += "--------------------------------\n";
             printText += `Tgl: ${new Date().toLocaleString('id-ID')}\n`;
             printText += `Plg: ${customerName.toUpperCase()}\n`;
             printText += `Lok: ${curFloor} | Met: ${curPM}\n`;
             printText += "--------------------------------\n";
-
             cart.forEach(i => {
                 let nama = i.name.substring(0, 18);
                 let line = `${nama.padEnd(18)} ${String(i.qty).padStart(2)}x ${ (i.price*i.qty).toLocaleString().padStart(8) }\n`;
                 printText += line;
             });
-
             printText += "--------------------------------\n";
             printText += `TOTAL:   Rp ${tot.toLocaleString().padStart(15)}\n`;
             if (curPM === 'TUNAI') {
@@ -624,26 +634,16 @@
             printText += "--------------------------------\n";
             printText += "    Terima Kasih Atas\n";
             printText += "      Kunjungannya\n\n\n\n";
-
             const rawbtUrl = "rawbt:base64," + btoa(unescape(encodeURIComponent(printText)));
             window.location.href = rawbtUrl;
-
-            cart = []; 
-            updateUI(); 
-            closeModal(); 
-            document.getElementById('cName').value = '';
+            cart = []; updateUI(); closeModal(); document.getElementById('cName').value = '';
             shakaDialog("Sukses", "Transaksi Berhasil!", "success");
-
-        } catch (e) {
-            shakaDialog("Gagal", "Gagal menyimpan transaksi.", "error");
-        }
+        } catch (e) { shakaDialog("Gagal", "Gagal menyimpan transaksi.", "error"); }
     };
 
     window.abortTrx = () => {
         shakaDialog("Konfirmasi", "Batalkan pesanan ini?", "error", () => {
-            cart = [];
-            updateUI();
-            closeModal();
+            cart = []; updateUI(); closeModal();
             shakaDialog("Dibatalkan", "Pesanan telah dihapus.", "success");
         });
     };
@@ -662,7 +662,6 @@
     window.closeDialog = () => document.getElementById('shakaDialog').style.display = 'none';
     window.closeModal = () => { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); };
     window.openExpenseModal = () => { document.getElementById('expenseModal').style.display = 'flex'; };
-    
     document.getElementById('menuSearch').addEventListener('input', renderMenu);
 </script>
 </body>

@@ -358,19 +358,27 @@
         fetchSalesData(); 
     });
 
+    // FUNGSI PERBAIKAN: URUTAN MENU PALING LAKU BERDASARKAN BULAN INI
     function fetchSalesData() {
-        const qTrx = query(collection(db, "transactions"), where("tgl", ">=", today), where("tgl", "<=", today + "\uf8ff"));
+        // Ambil awal bulan ini (YYYY-MM-01)
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        
+        // Query semua transaksi dari awal bulan ini sampai sekarang
+        const qTrx = query(collection(db, "transactions"), where("tgl", ">=", startOfMonth));
+        
         onSnapshot(qTrx, (s) => {
             salesMap = {};
             s.docs.forEach(doc => {
                 const data = doc.data();
                 if(data.items) {
                     data.items.forEach(item => {
+                        // Akumulasi jumlah terjual per nama produk
                         salesMap[item.n] = (salesMap[item.n] || 0) + item.q;
                     });
                 }
             });
-            renderMenu();
+            renderMenu(); // Re-render menu dengan urutan baru
             if(currentUser === "ADMIN") renderAdminInventory();
         });
     }
@@ -528,7 +536,6 @@
         document.getElementById('laporanList').innerHTML = htmlLaporan || '<div style="text-align:center; padding:50px; opacity:0.3;">Tidak ada data penjualan hari ini.</div>';
     };
 
-    // FITUR RIWAYAT DENGAN TOOLS ADMIN
     window.renderHistory = (data) => {
         document.getElementById('hList').innerHTML = data.sort((a,b) => new Date(b.tgl) - new Date(a.tgl)).map(t => {
             let itemHTML = (t.items && Array.isArray(t.items)) ? t.items.map(i => `<div>• ${i.n} (${i.q}x)</div>`).join('') : "";
@@ -537,7 +544,6 @@
             const floorColor = t.lokasi === 'LT 1' ? 'var(--gold)' : 'var(--lt2-cyan)';
             const floorIcon = t.lokasi === 'LT 1' ? 'fa-stairs' : 'fa-building-user';
 
-            // Tool Admin: Hapus & Edit Nama
             const adminTools = currentUser === "ADMIN" ? `
                 <div style="display:flex; gap:12px; margin-left:15px; border-left:1px solid rgba(255,255,255,0.1); padding-left:12px;">
                     <button onclick="editTrxName('${t.id}')" style="background:none; border:none; color:var(--bright-green); cursor:pointer;"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -569,7 +575,6 @@
         }).join('') || '<div style="text-align:center; padding:50px; opacity:0.3;">Belum ada riwayat.</div>';
     };
 
-    // FUNGSI ADMIN TOOLS
     window.deleteTrx = (id) => {
         shakaDialog("Hapus Riwayat?", "Data transaksi akan dihapus permanen. Stok barang tidak akan kembali otomatis.", "error", async () => {
             try {
@@ -698,7 +703,13 @@
     function renderMenu() {
         const s = document.getElementById('menuSearch').value.toLowerCase();
         let f = menus.filter(m => (selectedCat === 'ALL' || m.category === selectedCat) && m.name.toLowerCase().includes(s));
-        if(selectedCat === 'ALL') f.sort((a, b) => (salesMap[b.name] || 0) - (salesMap[a.name] || 0));
+        
+        // LOGIKA SORTING BERDASARKAN BULAN:
+        // Jika kategori "SEMUA" (ALL) terpilih, urutkan berdasarkan jumlah terjual di bulan ini
+        if(selectedCat === 'ALL') {
+            f.sort((a, b) => (salesMap[b.name] || 0) - (salesMap[a.name] || 0));
+        }
+        
         document.getElementById('menuGrid').innerHTML = f.map(m => {
             const qtySold = salesMap[m.name] || 0;
             const isHot = selectedCat === 'ALL' && qtySold > 0;

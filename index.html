@@ -636,20 +636,34 @@
         const totalSales = trxs.reduce((a, b) => a + b.total, 0);
         const incomeSalesTunai = trxs.filter(t => t.metode === 'TUNAI').reduce((a, b) => a + b.total, 0);
         const incomeSalesQris = trxs.filter(t => t.metode === 'QRIS').reduce((a, b) => a + b.total, 0);
+        
+        // Menghitung Total Pengeluaran
         const expOffline = exps.filter(e => e.metode === 'OFFLINE').reduce((a, b) => a + b.nominal, 0);
         const expOnline = exps.filter(e => e.metode === 'ONLINE').reduce((a, b) => a + b.nominal, 0);
+        const totalExpense = expOffline + expOnline; // Total pengeluaran harian
+        
         const kasKasir = incomeSalesTunai - expOffline;
         const kasBank = incomeSalesQris - expOnline;
-        const netProfit = totalSales - (expOffline + expOnline);
+        const netProfit = totalSales - totalExpense;
 
         document.getElementById('rekapSummary').innerHTML = `
             <div class="summary-card">
-                <div style="background:rgba(212,163,115,0.05); padding:15px; border-radius:20px; border:1px solid rgba(212,163,115,0.2); margin-bottom:15px;">
-                    <small style="opacity:0.6; font-weight:800; letter-spacing:1.5px;"><i class="fa-solid fa-cart-shopping"></i> TOTAL PENJUALAN (OMZET)</small>
-                    <h2 style="color:var(--gold); margin:5px 0 0 0; font-weight:800;">Rp ${totalSales.toLocaleString()}</h2>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:15px;">
+                    <div style="background:rgba(212,163,115,0.05); padding:15px; border-radius:20px; border:1px solid rgba(212,163,115,0.2);">
+                        <small style="opacity:0.6; font-weight:800; letter-spacing:1px;"><i class="fa-solid fa-cart-shopping"></i> OMZET</small>
+                        <h3 style="color:var(--gold); margin:5px 0 0 0; font-weight:800;">Rp ${totalSales.toLocaleString()}</h3>
+                    </div>
+                    <div style="background:rgba(255, 61, 0, 0.05); padding:15px; border-radius:20px; border:1px solid rgba(255, 61, 0, 0.2);">
+                        <small style="opacity:0.6; font-weight:800; letter-spacing:1px;"><i class="fa-solid fa-money-bill-transfer"></i> PENGELUARAN</small>
+                        <h3 style="color:var(--error); margin:5px 0 0 0; font-weight:800;">Rp ${totalExpense.toLocaleString()}</h3>
+                    </div>
                 </div>
-                <small style="opacity:0.6; font-weight:800; letter-spacing:2px;"><i class="fa-solid fa-chart-line"></i> ESTIMASI NET PROFIT</small>
-                <h1 style="color:var(--bright-green); margin:10px 0; font-size:2rem; font-weight:800;">Rp ${netProfit.toLocaleString()}</h1>
+
+                <div style="margin-bottom:20px;">
+                    <small style="opacity:0.6; font-weight:800; letter-spacing:2px;"><i class="fa-solid fa-chart-line"></i> ESTIMASI NET PROFIT</small>
+                    <h1 style="color:var(--bright-green); margin:10px 0; font-size:2.2rem; font-weight:800;">Rp ${netProfit.toLocaleString()}</h1>
+                </div>
+
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:15px 0;">
                     <div style="background:rgba(212,163,115,0.1); padding:15px; border-radius:20px; border:1px solid var(--gold);">
                         <small style="font-size:0.6rem; opacity:0.8; display:block; margin-bottom:5px; font-weight:800;">KAS KASIR (OFFLINE)</small>
